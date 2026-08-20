@@ -2,6 +2,10 @@
 
 Before any task, read `STREAMLINE-INVARIANTS.md` and `AGENT-PROTOCOL.md`.
 
+Start a working session with `/next` rather than picking an agent from memory — it reads
+`STATUS.md` and reports what is unblocked, what runs in parallel, and what is waiting on Angel.
+It recommends only; every agent it names still owes a Check-in A plan before writing code.
+
 Delegate to the agent that owns the affected paths. Never write outside your owned paths;
 request cross-boundary changes instead of making them.
 

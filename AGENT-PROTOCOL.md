@@ -149,3 +149,25 @@ forgetting earlier decisions, reset rather than re-explaining.
 
 This is why the decision records matter: anything written to `docs/decisions/` survives a context
 clear, and anything living only in conversation history does not.
+
+## 8. Sequencing and the `/next` loop
+
+`STATUS.md` holds the current state of §5 as data: each agent's last verdict, its unmet
+dependencies, and which open decisions hold which specific work. Archivist maintains it on the
+same batched cadence as decision records.
+
+`/next` reads that file and recommends what is launchable now, what can run alongside it, and what
+is waiting on Angel. **It recommends; Angel launches.** It cannot start an agent, approve a plan,
+or answer an open decision — every agent it names still owes a Check-in A plan first. The gate in
+§1 is the reason this protocol exists and automation does not get to route around it.
+
+Two clarifications the graph depends on:
+
+**Advocate is a pre-gate as well as a release gate.** §5 lists it in the final wave; `advocate.md`
+requires the two-audience test *before* a feature is built. Both hold — it runs ahead of any
+feature-bearing work and again at release. `/next` surfaces it in both positions.
+
+**Parallelism is bounded by dependency, not by file conflict.** Every agent's owned paths in §2
+are disjoint, so no two agents can collide on a file. The only shared files are proposal-only. So
+the question is never "can these two run together safely" — it is only "does one need the other's
+output first."
