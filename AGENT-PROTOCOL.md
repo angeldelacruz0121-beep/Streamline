@@ -38,6 +38,11 @@ evidence.
     Known gaps:  <honest list; "none" is rarely true>
     Next:        <what this unblocks>
 
+*Specialized escalations.* An agent may define a named variant of Check-in B where its domain
+needs a different set of fields — Atelier's `PROPOSAL` (see `atelier.md`) is one. A variant is
+still a Check-in B: work stops, Angel decides, the agent does not proceed on its own
+recommendation. It is not a fourth check-in.
+
 ## 2. File ownership
 
 Agents write only inside owned paths. Cross-boundary changes are requested, not made.
@@ -96,7 +101,7 @@ Agents earn autonomy by escalating honestly and lose it by guessing.
 Quality is the constraint; efficiency is the objective under it. Never trade a correct result for
 a cheaper one. Do trade a wasteful path for an equivalent one.
 
-**Model assignment.** Three agents are pinned. The other six inherit the session default, so
+**Model assignment.** Four agents are pinned. The other five inherit the session default, so
 Angel controls their cost at the session level rather than having it fixed in a file.
 
 | Agent | Model | Reason |
@@ -107,12 +112,14 @@ Angel controls their cost at the session level rather than having it fixed in a 
 | Forge | inherit | Measure-fix loop; works well at default. |
 | Keel | inherit | Raise to opus manually for the type contract and initial architecture, then let it fall back. |
 | Conduit | inherit | HTTP, caching, backoff. Low ambiguity. |
-| Atelier | inherit | Taste originates with Angel; Atelier executes tokens and lint. |
+| Atelier | fable 5 (pinned) | Generative visual range pays off here. Bounded by the authority boundary in its agent file — proposes direction, never adopts it. |
 | Adversary | inherit | Highest-volume task in the project — fixtures and tests. |
 | Advocate | inherit | Judgment work but tiny output; raise manually when the call is genuinely close. |
 
 Pinning an agent to opus makes it consume opus capacity regardless of the session setting, which
-can exhaust a budget mid-session without warning. Only the three above are worth that risk.
+can exhaust a budget mid-session without warning. Only Ledger and Cartographer are worth that
+risk. The other two pins carry no such cost: Archivist pins *down* to haiku, and Atelier's fable
+pin draws on a separate capacity, not the opus budget.
 
 **Escalate the model, not the guess.** If an agent iterates three times on one task without
 converging, that is a signal the task needs a stronger model, not a fourth attempt. Stop and say
