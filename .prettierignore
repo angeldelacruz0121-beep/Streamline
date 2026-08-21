@@ -1,0 +1,17 @@
+# Prettier's scope is source code only. Governance docs, decision records and
+# agent files are hand-formatted and owned elsewhere - reflowing them would
+# produce cross-boundary diffs no one asked for.
+*.md
+.claude/
+docs/
+reports/
+
+# Retired prototype - frozen by docs/decisions/0001, never reformatted.
+reference/
+
+# Approved verbatim by Angel; kept byte-exact.
+package.json
+
+dist/
+coverage/
+package-lock.json
