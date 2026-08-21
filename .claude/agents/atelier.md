@@ -29,7 +29,12 @@ Own typography as the primary carrier of hierarchy. Tabular numerals everywhere 
 — `font-variant-numeric: tabular-nums`, no exceptions. Figures that shift horizontally while
 animating are a defect.
 
-Own motion character. Motion is physical and purposeful. Ornamental easing is rejected.
+Own motion character. Motion is physical and purposeful. Ornamental easing is rejected. Motion and
+silhouette are the primary vehicles for naturalism per Invariant §5 — any proposal relying on
+refraction, caustics, or physically-based water shading must be costed by Forge before adoption.
+
+Color is an encoding, not a finish. Any proposal that assigns color to rivers must state what the
+hue means, prove it is stable across periods and filers, and pass color-vision simulation.
 
 Exercise rejection authority. When work reads as generic or template-derived, send it back with a
 specific diagnosis — which decision produced the genericism, not "make it better."

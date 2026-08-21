@@ -131,13 +131,32 @@ against, the encoding does not ship.
 
 ## 4. Engineering rules
 
-**4.1 Frame budget.** 60fps sustained at the reference load on the reference machine.
+**4.1 Frame budget.** The standard is smoothness, not a fixed framerate. Average FPS is not the
+governing metric — frame time consistency is. A steady 50fps reads as smooth; a 60fps average
+punctuated by hitches reads as broken.
+
 Reference load: 12 segments, desktop viewport.
 Reference machine: 2020 MacBook Air, integrated graphics.
-Standard: no crashes, no stutter, no thermal runaway on any machine of that class or newer.
 
-Below budget, the renderer degrades particle density automatically. Geometry accuracy is never
-degraded, at any framerate, for any reason.
+Measured at the reference load on the reference machine:
+
+| Metric | Standard |
+|---|---|
+| Target frame time | 16.7ms (60fps) |
+| Acceptable sustained | 20ms (50fps) |
+| 95th percentile | at or below 20ms |
+| 99th percentile | at or below 33ms — no frame produces a visible hitch |
+| Hard fail | any single frame above 50ms, or any dropped-frame cluster |
+
+Higher is always better and no ceiling is imposed. The floor is that the product never looks
+choppy and never becomes unusable.
+
+**Degrade to a clean divisor.** A floating framerate produces uneven frame pacing and visible
+judder, which often looks worse than a lower locked rate. When the renderer must degrade, it
+locks to a clean divisor of the display refresh rate rather than floating between values.
+
+Degradation reduces particle density first. Geometry accuracy is never degraded, at any
+framerate, for any reason.
 
 **4.2 Reduced motion.** `prefers-reduced-motion` produces a fully static, fully accurate
 rendering with identical information content. An equivalent, not a lesser version.
@@ -165,8 +184,20 @@ Near-black base. Restrained palette with purposeful accent color. Typographic hi
 the interface; chrome does not. Tabular numerals on every figure. Motion is physical and
 purposeful, never ornamental easing. Density over whitespace where an analyst is the reader.
 
+**Naturalism.** Rivers should read as water and the lake should read as a lake. The visualization
+needs life and physical presence, not saturation. Naturalism is pursued through motion behavior,
+silhouette, surface, and light — never through refraction, caustics, or physically-based water
+shading, which will not hold the frame budget on reference hardware. Forge costs any proposed
+approach before Atelier commits to it.
+
+**Color is encoding, not decoration.** The palette stays restrained. Where color distinguishes
+segments it is a stable hue per segment, consistent across periods and across filers, documented
+in the scales, and verified under deuteranopia and protanopia simulation. Vibrance for its own
+sake is rejected — it would breach Invariant 3.6 by making viewers read meaning into an arbitrary
+choice.
+
 Explicitly rejected: gradients without function, glassmorphism as decoration, generic
-AI-interface genericism, anything that reads as a template.
+AI-interface genericism, anything that reads as a template, and decorative color.
 
 ---
 
@@ -174,10 +205,10 @@ AI-interface genericism, anything that reads as a template.
 
 Answered — do not revisit without amending this file:
 D1 lake encoding = area · D2 negative earnings = drained basin with proportional depth ·
-D3 flow speed = YoY segment growth · D4 reference load/machine = 12 segments, 2020 MacBook Air ·
+D3 flow speed = YoY segment growth · D4 frame budget = percentile frame-time standard at 12 segments / 2020 MacBook Air ·
 D5 data source = SEC EDGAR direct · D6 segment cap = top 5–8 plus "More" ·
 D7 coverage = technology sector only, SIC 3570–3579 and 7370–7379 · D8 single-segment = render
-as-is with a note.
+as-is with a note · D14 visual direction = naturalistic, restrained, color encoded not decorative.
 
 Open — agents escalate rather than decide:
 
@@ -188,6 +219,7 @@ Open — agents escalate rather than decide:
 | D11 | Cost categories shown as constrictions, and their fixed order along the river | Cartographer, Ledger | COGS → R&D → S&M → other opex |
 | D12 | Default period on load: latest fiscal year, latest quarter, or TTM | Advocate, Keel | latest fiscal year |
 | D13 | Depth scale for the drained basin — same scale as lake area, or its own | Cartographer | own scale, documented |
+| D15 | Which segment-hue set, once color becomes an encoding | Cartographer, Atelier | none assigned yet |
 
 ---
 

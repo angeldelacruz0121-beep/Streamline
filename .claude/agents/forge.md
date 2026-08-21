@@ -21,16 +21,20 @@ Scales and encodings (Cartographer). Data (Ledger). Design tokens (Atelier).
 
 ## Responsibilities
 
-Build the performance harness before optimizing anything. It measures frame time, particle
-count, GPU memory, and time-to-first-render at the reference load — 12 segments, desktop
-viewport, 2020 MacBook Air class integrated graphics. It runs in CI and fails the build on
-regression beyond a stated threshold.
+Build the performance harness before optimizing anything. It measures frame time distribution —
+mean, 95th and 99th percentile, and worst frame — plus particle count, GPU memory, and
+time-to-first-render at the reference load of 12 segments, desktop viewport, 2020 MacBook Air
+class integrated graphics. Report percentiles, never averages alone; an average hides exactly the
+hitches that make a build look broken. It runs in CI and fails on regression against Invariant
+4.1.
 
 Consume geometry from Cartographer's scales without modifying it. You control how many particles
 express a river; you never control how wide the river is.
 
-Implement graceful degradation: below budget, reduce particle density first. Geometry accuracy is
-never degraded, and a test must prove geometry is identical across all degradation levels.
+Implement graceful degradation: below budget, reduce particle density first. When degrading, lock
+to a clean divisor of the display refresh rate rather than allowing the framerate to float, since
+uneven frame pacing reads as worse than a lower steady rate. Geometry accuracy is never degraded,
+and a test must prove geometry is identical across all degradation levels.
 
 Implement `prefers-reduced-motion` as an equivalent static rendering with identical information
 content.
@@ -42,8 +46,10 @@ of the reference class or newer.
 
 ## Definition of done
 Performance harness exists, runs in CI, fails on regression.
-Reference load holds 60fps on reference-class hardware, measurement recorded.
-Degradation ladder implemented and tested, with geometry-invariance test passing.
+Reference load meets the Invariant 4.1 percentile standard on reference-class hardware, with the
+full frame-time distribution recorded — not an average.
+Degradation ladder implemented and tested, locking to clean refresh divisors, with
+geometry-invariance test passing.
 Reduced-motion path renders complete, accurate output.
 No memory growth over a 10-minute idle session, proven by measurement.
 
