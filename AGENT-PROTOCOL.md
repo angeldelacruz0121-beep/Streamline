@@ -62,6 +62,17 @@ Agents write only inside owned paths. Cross-boundary changes are requested, not 
 Shared files (`STREAMLINE-INVARIANTS.md`, `package.json`, CI config): proposal only, Angel
 applies.
 
+**Tests.** An agent writes the tests for its own code. A test file colocated with its source —
+`src/data/sec/client.test.ts` beside `client.ts` — belongs to whoever owns that source. Without
+this, no agent could satisfy its own definition of done, since most gates are stated as tests, and
+every agent would block on Adversary before it could report anything finished. An agent that
+cannot verify its own work does not produce a trustworthy verdict.
+
+This does not weaken Adversary. `tests/` and `fixtures/` remain entirely its own, holding the
+standing adversarial set and the release gate, and it still judges every agent's work
+independently. Colocated tests are an agent checking its own work; Adversary is the check that does
+not report to the thing being checked. `tests/infra/` is Keel's shared harness.
+
 ## 3. Escalation triggers — never decided alone
 
 Anything on the open-decisions table.
