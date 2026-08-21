@@ -8,7 +8,7 @@ file is wrong.
 `/next` reads this file instead of re-deriving state from git history, which is the §7 principle
 applied directly: anything that must survive a context clear lives in a file.
 
-Last updated: 2026-08-20 · by: Angel
+Last updated: 2026-08-20 · 19:47 UTC · by: Angel
 
 ---
 
@@ -45,9 +45,9 @@ Workstream sequence (report §7, plus the scaffold it omitted):
 
 | # | Workstream | Owner | State |
 |---|---|---|---|
-| 0 | Project scaffold | Keel | not started |
-| 1 | EDGAR ingestion | Conduit | blocked by 0 |
-| 2 | Segment extraction | Ledger | blocked by 1 |
+| 0 | Project scaffold | Keel | COMPLETE |
+| 1 | EDGAR ingestion | Conduit | COMPLETE |
+| 2 | Segment extraction | Ledger | ready (WS 1 COMPLETE) |
 | 3 | Derivation methods | Ledger | blocked by 2 |
 | 4 | Lake encoding | Cartographer | blocked by 2 |
 | 5 | Constriction rendering | Cartographer | blocked by 2 |
@@ -63,12 +63,12 @@ Valid: `not started` · `in progress` · `COMPLETE` · `PARTIAL` · `BLOCKED`
 
 | Agent | Status | Date | Blocked by | Unblocks |
 |---|---|---|---|---|
-| Ledger | not started | — | nothing | Keel, Conduit, Cartographer (sync), Adversary |
-| Cartographer | not started | — | nothing (core work); D9/D11/D13 for specific encodings | Forge, Adversary |
-| Keel | not started | — | Ledger contract; D12 | Forge, Atelier, Adversary |
-| Conduit | not started | — | Ledger source interface | Adversary |
-| Forge | not started | — | Cartographer scales, Keel types | Adversary |
-| Atelier | not started | — | Keel primitives (for components); nothing for tokens | Adversary |
+| Ledger | not started | — | nothing | Keel (DONE), Conduit (DONE), Cartographer (sync), Adversary |
+| Cartographer | not started | — | nothing (core work); D9 for specific encodings | Forge, Adversary |
+| Keel | COMPLETE | 2026-08-20 | — | Forge, Atelier, Adversary |
+| Conduit | COMPLETE | 2026-08-20 | — | Adversary |
+| Forge | not started | — | Cartographer scales, Keel types (DONE) | Adversary |
+| Atelier | not started | — | Keel primitives (DONE, for components); nothing for tokens | Adversary |
 | Adversary | not started | — | anything shippable to test | release gate |
 | Advocate | not started | — | nothing — runs BEFORE each feature | every feature-bearing agent |
 | Archivist | continuous | — | never blocked | — |
@@ -134,8 +134,7 @@ escalate-only.
 | D17 | Third provenance state — reported-and-tagged but filer-allocated | Ledger, Advocate | The analyst detail panel. Slice geometry is unaffected; the figures are still reported and traceable. |
 | D18 | Profit-side reconciliation rule | Ledger, Cartographer | Company two. Microsoft's segments sum to operating income exactly; Apple and Oracle do not. |
 
-**Answered:** D1–D8, D11, D13, D14, D16 — settled in Invariant §6 with amendment-log entries, and
-not revisited without an amendment.
+**Answered:** D1–D8, D11 (docs/decisions/0005-d11-filer-shaped-constrictions.md), D13 (docs/decisions/0006-d13-basin-area-encodes.md), D14, D16 (docs/decisions/0007-d16-trunk-constriction.md) — settled in Invariant §6 with amendment-log entries, and not revisited without an amendment.
 
 ---
 
