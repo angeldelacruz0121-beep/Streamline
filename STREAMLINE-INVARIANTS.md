@@ -131,32 +131,44 @@ against, the encoding does not ship.
 
 ## 4. Engineering rules
 
-**4.1 Frame budget.** The standard is smoothness, not a fixed framerate. Average FPS is not the
-governing metric — frame time consistency is. A steady 50fps reads as smooth; a 60fps average
-punctuated by hitches reads as broken.
+**4.1 Frame budget.** Framerate is a floor to defend, not a target to maximize. Visual quality
+may be paid for in framerate down to that floor. A steady locked rate reads as smooth; a higher
+average punctuated by hitches reads as broken. **Average FPS is not a governing metric at all** —
+it is the metric most likely to hide the exact hitches that make a build feel cheap.
 
 Reference load: 12 segments, desktop viewport.
 Reference machine: 2020 MacBook Air, integrated graphics.
 
-Measured at the reference load on the reference machine:
+Two independent standards. Both must hold; neither substitutes for the other.
+
+**Render smoothness** — measured at the reference load on the reference machine:
 
 | Metric | Standard |
 |---|---|
-| Target frame time | 16.7ms (60fps) |
-| Acceptable sustained | 20ms (50fps) |
-| 95th percentile | at or below 20ms |
-| 99th percentile | at or below 33ms — no frame produces a visible hitch |
-| Hard fail | any single frame above 50ms, or any dropped-frame cluster |
+| Locked rate | 60fps preferred; 30fps floor. Always a clean divisor of display refresh — never floating |
+| Pacing | No frame exceeds 1.5× the locked interval (25ms at 60, 50ms at 30) |
+| 99th percentile | Within the locked interval |
+| Hard fail | Sustained below the 30fps floor, any dropped-frame cluster, or any unlocked/floating rate |
 
-Higher is always better and no ceiling is imposed. The floor is that the product never looks
-choppy and never becomes unusable.
+**Interaction responsiveness** — measured independently of render rate:
 
-**Degrade to a clean divisor.** A floating framerate produces uneven frame pacing and visible
-judder, which often looks worse than a lower locked rate. When the renderer must degrade, it
-locks to a clean divisor of the display refresh rate rather than floating between values.
+| Metric | Standard |
+|---|---|
+| Hover and click feedback | Under 100ms |
+| Hard fail | Any interaction gated behind the render loop |
 
-Degradation reduces particle density first. Geometry accuracy is never degraded, at any
-framerate, for any reason.
+These are separate because they fail separately. A product rendering at a locked 30fps still
+feels immediate when input handling is not blocked on the frame; a product at 60fps feels broken
+when it is.
+
+**Quality outranks rate; both outrank nothing else.** When the budget is tight the renderer steps
+the *locked rate* down first — 60 to 30 — and keeps render quality: antialiasing, blur and bloom
+quality, particle density, device pixel ratio. Reducing visual density is the second lever, used
+only when the 30fps floor cannot hold. This is deliberate: a thinner-looking product on the
+hardware most users actually have is a worse outcome than a locked 30.
+
+**Geometry accuracy is never degraded**, at any framerate, for any reason. It is not a lever and
+it is not on this ladder.
 
 **4.2 Reduced motion.** `prefers-reduced-motion` produces a fully static, fully accurate
 rendering with identical information content. An equivalent, not a lesser version.
@@ -187,8 +199,8 @@ purposeful, never ornamental easing. Density over whitespace where an analyst is
 **Naturalism.** Rivers should read as water and the lake should read as a lake. The visualization
 needs life and physical presence, not saturation. Naturalism is pursued through motion behavior,
 silhouette, surface, and light — never through refraction, caustics, or physically-based water
-shading, which will not hold the frame budget on reference hardware. Forge costs any proposed
-approach before Atelier commits to it.
+shading, which will not hold the frame budget on reference hardware even at the 30fps floor.
+Forge costs any proposed approach before Atelier commits to it.
 
 **Color is encoding, not decoration.** The palette stays restrained. Where color distinguishes
 segments it is a stable hue per segment, consistent across periods and across filers, documented
@@ -205,7 +217,7 @@ AI-interface genericism, anything that reads as a template, and decorative color
 
 Answered — do not revisit without amending this file:
 D1 lake encoding = area · D2 negative earnings = drained basin with proportional depth ·
-D3 flow speed = YoY segment growth · D4 frame budget = percentile frame-time standard at 12 segments / 2020 MacBook Air ·
+D3 flow speed = YoY segment growth · D4 frame budget = locked-rate floor (60 preferred, 30 floor) with quality outranking rate; input latency measured separately ·
 D5 data source = SEC EDGAR direct · D6 segment cap = top 5–8 plus "More" ·
 D7 coverage = technology sector only, SIC 3570–3579 and 7370–7379 · D8 single-segment = render
 as-is with a note · D14 visual direction = naturalistic, restrained, color encoded not decorative.
