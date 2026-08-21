@@ -4,6 +4,10 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "bundler",
+    // Relative specifiers inside `src/data/**` carry their `.ts` extension so
+    // that `server/` can run them under Node's native type stripping, which
+    // does not resolve extensionless specifiers.
+    "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "types": ["vite/client", "node"]
   },

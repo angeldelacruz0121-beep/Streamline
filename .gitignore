@@ -3,6 +3,11 @@ dist/
 coverage/
 .vite/
 *.tsbuildinfo
-.env*
+.env
+.env.*
+!.env.example
 .DS_Store
 *.local
+
+# EDGAR response cache - regenerable, and large.
+.cache/
