@@ -58,6 +58,23 @@ Consequence: **Standing constraint for every agent, not just Conduit: no email a
              actual filing, and the failure at that point is loud and self-explaining rather than a
              silent 403.
 
+**Resolved, 2026-08-20.** Angel created a dedicated address for the project rather than using his
+personal one — the outcome this record was written to make possible, and the one SEC's own guidance
+models (its published sample is a role address, `AdminContact@<company>.com`, not an individual's).
+It is set in a gitignored `.env`, mode 600, and appears in no tracked file.
+
+Verified the same day: the first live request this project has made to SEC returned HTTP 200 and
+the expected filing — `0001193125-26-323660`, Microsoft Corp, SIC 7372 — confirming the coverage
+test in Invariant §1 against production rather than against a fixture. Known gap 5 in Conduit's
+Workstream 1 verdict ("zero live EDGAR verification") is closed.
+
+Two things a future reader should not have to rediscover. SEC's policy page phrases the header as
+*"please declare your user agent"*, but it is enforced in practice — the same endpoint returns 403
+without one and 200 with one, measured. And SEC publishes historical EDGAR access-log datasets with
+partially anonymised IPs; whether User-Agent strings appear in them was **not** established. That
+unresolved question is a further argument for the dedicated address over a personal one, and should
+be treated as unknown rather than assumed private.
+
              Noted, not decided: full-text search is the natural path for finding a company by name
              rather than by CIK. Deliberately unimplemented in v1, since the vertical slice already
              knows its target accession. It becomes relevant when the company switcher is built,
