@@ -11,8 +11,16 @@ file. Only Angel amends this file.
 Streamline visualizes a company's earnings as a lake fed by rivers of revenue.
 
 Each river is one reportable revenue segment. As it flows toward the lake it passes through
-constriction points representing costs (COGS, R&D, S&M, overhead) that reduce the flow. The
-lake is net earnings — the sum of what survived the journey.
+constriction points representing costs that reduce the flow. The rivers then merge into a single
+trunk, which passes through one final shared constriction — tax and non-operating items — before
+reaching the lake. The lake is net earnings: what survived the whole journey.
+
+The trunk constriction exists because segment reporting stops at operating income. Tax and
+non-operating items are real, reported, and attributable to no individual segment, so they cannot
+narrow any single river without being invented. Microsoft FY2026 is the worked example: segment
+operating income sums to $155.2B, consolidated net income is $133.7B, and the $21.5B between them
+is exactly what the trunk constriction represents. Without it the rivers do not reach the lake and
+the visual fails to conserve.
 
 Two audiences, served simultaneously and without compromise:
 
@@ -82,16 +90,63 @@ composition. If the smallest segment is visually thin, that is the correct rende
 **3.2 Constriction is cost.** The reduction in river width at a bottleneck is proportional to the
 cost it represents, on the same scale as 3.1. Bottleneck visuals are never sized for aesthetics.
 
+**The constriction set is filer-shaped, not fixed.** Each river carries exactly the cost categories
+that filer discloses for that segment — no more, and none invented to fill a template. The count
+therefore varies between companies, and that variation is itself honest information about
+disclosure depth. It is labeled, in the manner Invariant 3.8 labels single-segment filers, so a
+sparse river reads as "this filer discloses one expense category per segment" rather than as
+operational simplicity.
+
+A fixed category set cannot be sourced. ASU 2023-07 requires filers to disclose significant segment
+expenses but lets each choose its own categories, and no two of the technology filers surveyed use
+the same taxonomy: Microsoft reports cost of revenue and a single undifferentiated operating
+expenses line; Apple reports cost of sales and selling and marketing while explicitly declining to
+allocate R&D to segments at all; Alphabet splits by natural expense rather than by function; Adobe
+discloses no segment operating expense whatsoever. Imposing a uniform COGS → R&D → S&M → other opex
+order would mean inventing most of the geometry, and 3.1 makes width itself the quantitative claim
+— a derived-styled constriction is still a wrong number drawn to scale.
+
+**The trunk constriction.** After the rivers merge, one final constriction carries tax and
+non-operating items, on the same scale as 3.1. It is shared rather than per-segment because those
+items are attributable to no segment. Where a filer's segment profit measure does not reconcile to
+consolidated operating income, the unallocated corporate remainder is rendered here explicitly and
+never absorbed silently into the rivers.
+
 **3.3 The lake encodes net earnings by AREA.** Lake surface area is linearly proportional to net
 earnings. Area, not diameter — diameter would quadruple apparent magnitude on a doubling and
 overstate every comparison. A scale indicator is displayed so the encoding is verifiable.
 
+The lake encodes **consolidated net earnings**, which is what arrives after the trunk constriction
+of 3.2 — not the sum of segment operating income. A small positive result renders as a small lake
+even with wide rivers arriving; that is correct, and is defended the same way 3.4 defends the loss
+case: the rivers are still visibly consumed, and the smallness is the point.
+
 **3.4 Negative net earnings render as a DRAINED BASIN.** When net earnings is negative, the lake
-renders as an empty basin with a visible shoreline and a floor below grade. The depth below the
-shoreline is linearly proportional to the magnitude of the loss, on a documented scale. The
-shoreline stays in place so a loss-making company remains visually comparable to a profitable
-one at the same zoom. Rivers still flow in and are still consumed — the loss is shown as a void
-that revenue failed to fill, not as an absence of revenue.
+renders as an empty basin with a visible shoreline and a floor below grade. Rivers still flow in
+and are still consumed — the loss is shown as a void that revenue failed to fill, not as an absence
+of revenue.
+
+**The basin's plan area carries the magnitude, on the same area constant as 3.3.** A −$10B basin and
+a +$10B lake therefore occupy the same footprint and are read through the same perceptual channel,
+and the encoding is continuous through zero. Depth below the shoreline remains linearly
+proportional to the magnitude of the loss on its own documented scale, but as a redundant channel:
+it reinforces the number, it does not carry it. No volumetric shading cue may be used, since
+volume would grow as the square of the magnitude and over-read large losses.
+
+**"The shoreline stays in place" means a fixed reference plane, not a fixed size.** The shoreline
+holds at the same grade so a loss-making company stays comparable to a profitable one at the same
+zoom; its extent varies with the magnitude. A constant footprint would defeat that comparability
+rather than serve it — at a common scale it would render a −$100M loss with roughly a thousand
+times the area of a +$100M profit.
+
+Because equal magnitudes of either sign now produce equally sized shapes, **sign must be carried
+unmistakably by non-size cues** — dry floor, rim treatment, and label — and per 3.10 never by color
+alone.
+
+**A drained basin must not read as a stock.** A permanent-looking hole invites "this company is
+$10B in the hole," which is a balance-sheet reading of what is one period's flow. The period is
+labeled on the rim, and changing the period visibly re-fills or re-drains the basin, so the state
+reads as belonging to that period.
 
 **3.5 Flow speed encodes YoY segment revenue growth.** Faster flow means faster growth. Mapping
 is linear from −20% YoY (0.5× baseline speed) to +40% YoY (2.0× baseline speed), clamped at
@@ -220,7 +275,11 @@ D1 lake encoding = area · D2 negative earnings = drained basin with proportiona
 D3 flow speed = YoY segment growth · D4 frame budget = locked-rate floor (60 preferred, 30 floor) with quality outranking rate; input latency measured separately ·
 D5 data source = SEC EDGAR direct · D6 segment cap = top 5–8 plus "More" ·
 D7 coverage = technology sector only, SIC 3570–3579 and 7370–7379 · D8 single-segment = render
-as-is with a note · D14 visual direction = naturalistic, restrained, color encoded not decorative.
+as-is with a note · D14 visual direction = naturalistic, restrained, color encoded not decorative ·
+D11 constrictions = filer-shaped and reported, variable count, no fixed category set ·
+D13 basin = plan area on the 3.3 area constant, depth linear but redundant ·
+D16 trunk constriction = tax and non-operating items carried after the confluence, so the lake
+remains consolidated net earnings.
 
 Open — agents escalate rather than decide:
 
@@ -228,10 +287,10 @@ Open — agents escalate rather than decide:
 |---|---|---|---|
 | D9 | Growth-to-speed mapping bounds | Cartographer | −20%→0.5×, +40%→2.0×, clamped |
 | D10 | SIC ranges are a proxy for "tech" and will miss or wrongly include some filers | Ledger, Advocate | SIC 3570–3579, 7370–7379 |
-| D11 | Cost categories shown as constrictions, and their fixed order along the river | Cartographer, Ledger | COGS → R&D → S&M → other opex |
 | D12 | Default period on load: latest fiscal year, latest quarter, or TTM | Advocate, Keel | latest fiscal year |
-| D13 | Depth scale for the drained basin — same scale as lake area, or its own | Cartographer | own scale, documented |
 | D15 | Which segment-hue set, once color becomes an encoding | Cartographer, Atelier | none assigned yet |
+| D17 | A third provenance state. 2.3's binary `reported \| derived` cannot express a figure that is reported and XBRL-tagged yet is the filer's own internal allocation — Microsoft states its segment cost of revenue is allocated "based on a relative revenue methodology". Not blocking the slice; needed before the analyst detail panel | Ledger, Advocate | binary, with the filer's method quoted in the panel |
+| D18 | A profit-side reconciliation rule. 2.4 mandates 0.5% on revenue only, but the river-into-lake metaphor asserts one on profit too. Microsoft is clean (segments sum to operating income exactly); Apple leaves $42.6B unallocated and Oracle's segment profit measure is not GAAP operating income | Ledger, Cartographer | none — escalate on first failing filer |
 
 ---
 
@@ -240,3 +299,9 @@ Open — agents escalate rather than decide:
 | Date | Change | By |
 |---|---|---|
 | — | Initial. D1–D8 answered. | Angel |
+| 2026-08-20 | 4.1 rewritten: framerate is a floor, not a target; quality outranks rate above it; interaction latency split out as its own standard. D4 redefined. | Angel |
+| 2026-08-20 | §5 gains Naturalism and Colour-is-encoding. D14 answered; D15 opened. | Angel |
+| 2026-08-20 | 3.2: constriction set is filer-shaped with a variable count; trunk constriction added. D11 answered. | Angel |
+| 2026-08-20 | 3.4: basin plan area carries magnitude on 3.3's constant; depth demoted to a redundant channel; shoreline clarified as a fixed reference plane. D13 answered. | Angel |
+| 2026-08-20 | §1 and 3.3: trunk constriction carries tax and non-operating items so the lake remains consolidated net earnings. D16 answered. | Angel |
+| 2026-08-20 | D17 and D18 opened — a third provenance state, and a profit-side reconciliation rule. Both surfaced by EDGAR research; neither blocks the first slice. | Angel |

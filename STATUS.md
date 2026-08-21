@@ -8,7 +8,51 @@ file is wrong.
 `/next` reads this file instead of re-deriving state from git history, which is the §7 principle
 applied directly: anything that must survive a context clear lives in a file.
 
-Last updated: 2026-08-20 · by: Angel (initial)
+Last updated: 2026-08-20 · by: Angel
+
+---
+
+## 0. Current milestone — the vertical slice
+
+**Microsoft Corporation, FY2026, rendered end to end from EDGAR.** Adopted per
+`docs/decisions/0004-vertical-slice-milestone.md`. No new feature surface until it lands.
+
+Gate, and it is binary: **no figure displayed anywhere in the application is invented.**
+
+Verified target (checked against EDGAR directly, then re-verified adversarially — do not re-derive):
+
+| Fact | Value |
+|---|---|
+| CIK | 0000789019 |
+| Accession | 0001193125-26-323660 |
+| Filed | 2026-07-29 · period end 2026-06-30 (FY2026 = 2025-07-01 → 2026-06-30) |
+| SIC | 7372 — inside D7's 7370–7379 band |
+| Segment axis | `us-gaap:StatementBusinessSegmentsAxis` |
+| Members | `msft:` namespace, not `us-gaap:` — enumerate at parse time, cross-check `us-gaap:NumberOfReportableSegments` (3) |
+| Measures per segment | revenue, cost of revenue, operating expenses, operating income |
+| Segment operating income | $155,237M · consolidated net income $133,700M · trunk constriction carries the $21,537M |
+
+Three constraints that shape implementation:
+
+- **The convenience API cannot see segment data.** `companyfacts` / `companyconcept` return only
+  non-dimensional facts. Segment extraction must parse the raw XBRL instance or FilingSummary
+  R-files.
+- **Note numbers are unstable** — Note 18 in FY2026/FY2025, Note 19 in FY2024. Key off the axis or
+  FilingSummary role ID `995637`.
+- **EDGAR returns HTTP 403 without a User-Agent.** Invariant 4.6 is empirically confirmed.
+
+Workstream sequence (report §7, plus the scaffold it omitted):
+
+| # | Workstream | Owner | State |
+|---|---|---|---|
+| 0 | Project scaffold | Keel | not started |
+| 1 | EDGAR ingestion | Conduit | blocked by 0 |
+| 2 | Segment extraction | Ledger | blocked by 1 |
+| 3 | Derivation methods | Ledger | blocked by 2 |
+| 4 | Lake encoding | Cartographer | blocked by 2 |
+| 5 | Constriction rendering | Cartographer | blocked by 2 |
+| 6 | Performance harness | Forge | gating — do not defer to the end |
+| 7 | Fixture and regression | Adversary | gating — do not defer to the end |
 
 ---
 
@@ -83,13 +127,15 @@ escalate-only.
 
 | # | Decision | Blocks | Specific work held |
 |---|---|---|---|
-| D9 | Growth-to-speed mapping bounds | Cartographer | Flow-speed encoding (Invariant 3.5). Cartographer's other scales are unaffected. |
-| D10 | SIC ranges as a proxy for "tech" | Ledger, Advocate | Coverage test edge cases; how the limit is communicated. Core extraction unaffected. |
-| D11 | Cost categories and their order along the river | Cartographer, Ledger | Constriction layout; segment cost stack shape. |
-| D12 | Default period on load (FY / quarter / TTM) | Advocate, Keel | Initial app state, routing defaults. |
-| D13 | Drained-basin depth scale | Cartographer | Negative-earnings encoding (Invariant 3.4). |
+| D9 | Growth-to-speed mapping bounds | Cartographer | Flow-speed encoding (Invariant 3.5). Excluded from the slice anyway — needs a validated prior-period comparison. |
+| D10 | SIC ranges as a proxy for "tech" | Ledger, Advocate | Coverage test edge cases; how the limit is communicated. Microsoft is SIC 7372, squarely in scope, so the slice is unaffected. |
+| D12 | Default period on load (FY / quarter / TTM) | Advocate, Keel | Initial app state, routing defaults. Slice renders one period, so a default is needed before the app has a second. |
+| D15 | Which segment-hue set, once color becomes an encoding | Cartographer, Atelier | Any use of color as an encoding. Not needed for the slice. |
+| D17 | Third provenance state — reported-and-tagged but filer-allocated | Ledger, Advocate | The analyst detail panel. Slice geometry is unaffected; the figures are still reported and traceable. |
+| D18 | Profit-side reconciliation rule | Ledger, Cartographer | Company two. Microsoft's segments sum to operating income exactly; Apple and Oracle do not. |
 
-**Answered (D1–D8)** are settled in Invariant §6 and are not revisited without an amendment.
+**Answered:** D1–D8, D11, D13, D14, D16 — settled in Invariant §6 with amendment-log entries, and
+not revisited without an amendment.
 
 ---
 
