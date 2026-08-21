@@ -4,8 +4,12 @@
  * gaps, an accession whose XBRL exhibit is incomplete - that no single real
  * filing exhibits all of.
  *
+ * Key names and value types follow the live payloads (`name` not `entityName`,
+ * `parent-dir` not `parentDir`, `size` as a string) so a probe cannot pass a
+ * schema the real service would fail.
+ *
  * Two rules keep them honest. Every identifier is deliberately zeroed
- * (`0000000000-00-00000X`, CIK `0`) so nothing here can be mistaken for a claim
+ * (`0000000000-00-00000X`, CIK `0000000000`) so nothing here can be mistaken for a claim
  * about a real filer, and there is not a single financial figure anywhere in
  * the file. They describe form codes and dates. Nothing else.
  */
@@ -24,8 +28,8 @@ export const PROBE_ACCESSION_INCOMPLETE = '0000000000-00-000004';
  * a second period with no filing at all (the gap); a third period filed clean.
  */
 export const probeSubmissions = {
-  cik: '0',
-  entityName: 'SHAPE PROBE - NOT A FILER',
+  cik: '0000000000',
+  name: 'SHAPE PROBE - NOT A FILER',
   sic: '0000',
   sicDescription: 'Structural probe',
   tickers: [],
@@ -83,16 +87,16 @@ export const probeSubmissionsOverflow = {
 export const probeArchiveIndexComplete = {
   directory: {
     name: `/Archives/edgar/data/0/${PROBE_ACCESSION_ORIGINAL.replace(/-/g, '')}`,
-    parentDir: '/Archives/edgar/data/0',
+    'parent-dir': '/Archives/edgar/data/0',
     item: [
-      { name: 'probe.htm', type: '10-K', size: 0 },
-      { name: 'probe-20231231_htm.xml', type: 'XML', size: 0 },
-      { name: 'probe-20231231_cal.xml', type: 'XML', size: 0 },
-      { name: 'probe-20231231_lab.xml', type: 'XML', size: 0 },
-      { name: 'FilingSummary.xml', type: 'XML', size: 0 },
-      { name: 'MetaLinks.json', type: 'JSON', size: 0 },
-      { name: 'R1.htm', type: 'HTM', size: 0 },
-      { name: 'R7.htm', type: 'HTM', size: 0 },
+      { name: 'probe.htm', type: 'text.gif', size: '0' },
+      { name: 'probe-20231231_htm.xml', type: 'text.gif', size: '0' },
+      { name: 'probe-20231231_cal.xml', type: 'text.gif', size: '0' },
+      { name: 'probe-20231231_lab.xml', type: 'text.gif', size: '0' },
+      { name: 'FilingSummary.xml', type: 'text.gif', size: '0' },
+      { name: 'MetaLinks.json', type: 'text.gif', size: '0' },
+      { name: 'R1.htm', type: 'text.gif', size: '0' },
+      { name: 'R7.htm', type: 'text.gif', size: '0' },
     ],
   },
 };
@@ -101,7 +105,7 @@ export const probeArchiveIndexComplete = {
 export const probeArchiveIndexIncomplete = {
   directory: {
     name: `/Archives/edgar/data/0/${PROBE_ACCESSION_INCOMPLETE.replace(/-/g, '')}`,
-    parentDir: '/Archives/edgar/data/0',
-    item: [{ name: 'probe-paper.htm', type: '10-K', size: 0 }],
+    'parent-dir': '/Archives/edgar/data/0',
+    item: [{ name: 'probe-paper.htm', type: 'text.gif', size: '0' }],
   },
 };

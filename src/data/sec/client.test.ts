@@ -2,10 +2,14 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { MemoryCacheStore } from '../cache/store.ts';
 import {
-  dailyIndexText,
+  dailyIndexCompanyText,
+  dailyIndexFormText,
+  dailyIndexMasterText,
+  microsoftFilingIndex,
   microsoftSubmissions,
+  MICROSOFT_ENTITY_NAME,
+  MICROSOFT_FACTS_ENTITY_NAME,
   MICROSOFT_10K_ACCESSION,
-  MICROSOFT_10K_FILING_DATE,
   MICROSOFT_10K_PERIOD_END,
   MICROSOFT_CIK,
   MICROSOFT_SIC,
@@ -43,11 +47,21 @@ function routeEverything(): void {
   });
   double.route(`/api/xbrl/companyfacts/CIK${MICROSOFT_CIK}.json`, {
     status: 200,
-    body: json({ cik: 789019, entityName: 'MICROSOFT CORP', facts: {} }),
+    // companyfacts really does use `entityName`, and really does spell the filer's
+    // name differently from submissions. Both are live-verified (2026-08-20).
+    body: json({ cik: 789019, entityName: MICROSOFT_FACTS_ENTITY_NAME, facts: {} }),
   });
   double.route(`/api/xbrl/companyconcept/CIK${MICROSOFT_CIK}/us-gaap/Revenues.json`, {
     status: 200,
-    body: json({ cik: 789019, taxonomy: 'us-gaap', tag: 'Revenues', units: {} }),
+    body: json({
+      cik: 789019,
+      taxonomy: 'us-gaap',
+      tag: 'Revenues',
+      label: 'Revenues',
+      description: 'Amount of revenue recognized.',
+      entityName: MICROSOFT_FACTS_ENTITY_NAME,
+      units: {},
+    }),
   });
   double.route('/Archives/edgar/data/0/000000000000000001/index.json', {
     status: 200,
@@ -62,10 +76,29 @@ function routeEverything(): void {
     body: '<html><body>primary document</body></html>',
     headers: { 'content-type': 'text/html' },
   });
-  double.route('/Archives/edgar/daily-index/2026/QTR3/form.20260729.idx', {
+  double.route('/Archives/edgar/data/789019/000119312526323660/index.json', {
     status: 200,
-    body: dailyIndexText,
-    headers: { 'content-type': 'text/plain' },
+    body: json(microsoftFilingIndex),
+  });
+
+  for (const [kind, body] of [
+    ['master', dailyIndexMasterText],
+    ['form', dailyIndexFormText],
+    ['company', dailyIndexCompanyText],
+  ] as const) {
+    double.route(`/Archives/edgar/daily-index/2026/QTR3/${kind}.20260819.idx`, {
+      status: 200,
+      body,
+      headers: { 'content-type': 'application/octet-stream' },
+    });
+  }
+
+  // The same day served with the wrong internal format - a format change, which
+  // must not look like a quiet day.
+  double.route('/Archives/edgar/daily-index/2026/QTR3/master.20260818.idx', {
+    status: 200,
+    body: dailyIndexFormText,
+    headers: { 'content-type': 'application/octet-stream' },
   });
 }
 
@@ -117,7 +150,13 @@ describe('submissions', () => {
     expect(result.value.filings.records[0]?.accession).toBe(MICROSOFT_10K_ACCESSION);
     expect(result.value.filings.records[0]?.reportDate).toBe(MICROSOFT_10K_PERIOD_END);
     expect(result.value.filings.malformedRows).toBe(0);
-    expect(result.value.historyTruncated).toBe(false);
+    // Read from the submissions document's `name`. There is no `entityName` there;
+    // requiring one is what broke the first live request.
+    expect(result.value.entityName).toBe(MICROSOFT_ENTITY_NAME);
+    // Present on the live document, contrary to the earlier comment in filings.ts.
+    expect(result.value.filerCategory).toBe('Large accelerated filer');
+    // Microsoft really does have two overflow files; the captured fixture keeps them.
+    expect(result.value.historyTruncated).toBe(true);
     expect(result.provenance.resource).toBe('submissions');
     expect(result.provenance.expiresAt).not.toBeNull();
   });
@@ -247,16 +286,72 @@ describe('accession contents', () => {
 });
 
 describe('daily index', () => {
-  it('parses the dissemination feed for a day into filing records', async () => {
-    const result = await client.getDailyIndex(MICROSOFT_10K_FILING_DATE);
+  const DAY = '2026-08-19';
+
+  it('parses the master feed, which is pipe-delimited', async () => {
+    const result = await client.getDailyIndex(DAY);
 
     expect(result.kind).toBe('ok');
 
     if (result.kind !== 'ok') return;
 
-    expect(result.value).toHaveLength(1);
-    expect(result.value[0]?.form).toBe('10-K');
-    expect(result.value[0]?.cik).toBe('789019');
-    expect(result.value[0]?.accession).toBe(MICROSOFT_10K_ACCESSION);
+    expect(result.value).toHaveLength(3);
+    expect(result.value[0]?.form).toBe('424B2');
+    expect(result.value[0]?.cik).toBe('1000275');
+    expect(result.value[0]?.companyName).toBe('ROYAL BANK OF CANADA');
+    // Normalised from the feed's `20260819`.
+    expect(result.value[0]?.filingDate).toBe(DAY);
+    expect(result.value[0]?.accession).toBe('0000950103-26-012581');
+  });
+
+  it('parses the form feed, which is fixed width rather than delimited', async () => {
+    const result = await client.getDailyIndex(DAY, 'form');
+
+    expect(result.kind).toBe('ok');
+
+    if (result.kind !== 'ok') return;
+
+    expect(result.value).toHaveLength(4);
+    expect(result.value[0]?.form).toBe('1-A/A');
+    expect(result.value[0]?.companyName).toBe('Casa Shares Assets, LLC');
+    expect(result.value[0]?.cik).toBe('1988874');
+    // A row whose filing date differs from the index date - real, and kept.
+    expect(result.value[1]?.filingDate).toBe('2026-08-17');
+    // EDGAR's own truncation of a form type to the 17-column field.
+    expect(result.value[2]?.form).toBe('SEC STAFF ACTIO');
+    expect(result.value[2]?.companyName).toBe('HUTURE Group Ltd');
+    // A form type containing a space still belongs to the form column, not the name.
+    expect(result.value[3]?.form).toBe('DEF 14A');
+    expect(result.value[3]?.companyName).toBe('ADVENT CONVERTIBLE & INCOME FUND');
+  });
+
+  it('parses the company feed, where the leading column is the name instead', async () => {
+    const result = await client.getDailyIndex(DAY, 'company');
+
+    expect(result.kind).toBe('ok');
+
+    if (result.kind !== 'ok') return;
+
+    expect(result.value).toHaveLength(4);
+    expect(result.value[0]?.companyName).toBe('1290 Funds');
+    expect(result.value[0]?.form).toBe('485APOS');
+    // 60 characters, against a 62-column field: the tightest real boundary case.
+    expect(result.value[2]?.companyName).toBe(
+      'Encompass Health Rehabilitation Hospital of Albuquerque, LLC',
+    );
+    expect(result.value[2]?.form).toBe('S-3ASR');
+    // An amended late-filing notification, carried through intact.
+    expect(result.value[3]?.form).toBe('NT 10-Q/A');
+  });
+
+  it('reports a format change as schema-mismatch, never as a day with no filings', async () => {
+    const result = await client.getDailyIndex('2026-08-18');
+
+    expect(result.kind).toBe('schema-mismatch');
+
+    if (result.kind !== 'schema-mismatch') return;
+
+    expect(result.detail).toContain('format');
+    expect(result.issues[0]?.message).toContain('none parsed');
   });
 });

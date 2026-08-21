@@ -18,8 +18,8 @@ reason with it, so a value can always explain why it was trusted.
 | `api/xbrl/companyfacts/...` | 24 hours | Derived from disseminated XBRL: it changes only when the filer files. |
 | `api/xbrl/companyconcept/...` | 24 hours | Same underlying data, narrower slice. |
 | `files/company_tickers.json` | 7 days | Regenerated roughly daily; a ticker↔CIK mapping changes rarely and a stale miss self-corrects on the next lookup. |
-| `daily-index/.../form.<past day>.idx` | **Immutable** | The day is closed. Nothing can be added to it. |
-| `daily-index/.../form.<today>.idx` | 15 minutes during acceptance hours; otherwise until the next open | The day is still filling. Outside the window it cannot fill, so the entry lives exactly until EDGAR can next accept a filing. |
+| `daily-index/.../<kind>.<past day>.idx` | **Immutable** | The day is closed. Nothing can be added to it. |
+| `daily-index/.../<kind>.<today>.idx` | 15 minutes during acceptance hours; otherwise until the next open | The day is still filling. Outside the window it cannot fill, so the entry lives exactly until EDGAR can next accept a filing. |
 | Any 404 | 1 hour | A missing period or a missing exhibit is a real state worth remembering, but short enough to notice a late filing. |
 
 Two refinements to the approved table, both strictly more conservative, both to avoid caching

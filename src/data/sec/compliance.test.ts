@@ -106,7 +106,7 @@ describe('User-Agent cannot be bypassed (Invariant 4.6)', () => {
       status: 200,
       body: '<html></html>',
     });
-    double.route('/Archives/edgar/daily-index/2026/QTR3/form.20260729.idx', {
+    double.route('/Archives/edgar/daily-index/2026/QTR3/master.20260729.idx', {
       status: 200,
       body: dailyIndexText,
     });

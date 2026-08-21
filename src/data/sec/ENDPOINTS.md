@@ -24,6 +24,23 @@ period of report, acceptance timestamps, XBRL flags. **Why:** it is the only end
 what a company filed and when, which is what amendment chains, late-filing notifications and
 period-gap detection are read from.
 
+**Field names, verified live 2026-08-20.** The filer's name is `name`. There is **no `entityName`
+on this endpoint** — that spelling belongs to companyfacts and companyconcept, and requiring it
+here made every live submissions fetch fail as `schema-mismatch` while a hand-written fixture kept
+the suite green. The client still exposes the value as `CompanySubmissions.entityName` so one
+adapter field means the same thing whichever endpoint it came from. `cik` arrives as a zero-padded
+string here and as a bare number on the xbrl APIs.
+
+**`category` is here.** The submissions document carries the filer category verbatim, e.g.
+`"Large accelerated filer"`, surfaced as `CompanySubmissions.filerCategory`. That is the input a
+filing deadline depends on, so whether a filing is *late* is now answerable — by Ledger, under
+Invariant 2.5. This layer passes the category through and still refuses to classify.
+
+**`filings.recent.isXBRLNumeric` is nullable and mostly null** — 946 of 1001 rows on the live
+Microsoft index. Columns observed: accessionNumber, filingDate, reportDate, acceptanceDateTime,
+act, form, fileNumber, filmNumber, items, core_type, size, isXBRL, isInlineXBRL, isXBRLNumeric,
+primaryDocument, primaryDocDescription.
+
 **Caveat that produces a silent gap if ignored:** `filings.recent` holds roughly the most recent
 thousand filings. Older history lives in `filings.files[]` overflow documents, which are *not*
 fetched by default. `CompanySubmissions.historyTruncated` says so explicitly, and
@@ -37,6 +54,13 @@ filer's full history. Served as the bare columnar object, not wrapped like the m
 **Used for:** every XBRL fact a company has reported, in one document. **Why:** for consolidated,
 entity-level figures it is one request instead of one per filing.
 
+Envelope, verified live 2026-08-20: `{ cik: number, entityName: string, facts: { <taxonomy>:
+{ <Tag>: { label, description, units: { <unit>: [{ end, val, accn, fy, fp, form, filed }] } } } } }`.
+Taxonomies observed for Microsoft: `dei` and `us-gaap`, 562 us-gaap tags. Conduit does not parse
+any of it — the shape is recorded here so Ledger's own boundary is written against an observed
+payload rather than an assumed one. Note the endpoint disagrees with submissions about the filer's
+own name: `MICROSOFT CORPORATION` here, `MICROSOFT CORP` there.
+
 > **Hard limitation. Read this before designing anything on top of it.**
 > The companyfacts and companyconcept APIs return **non-dimensional facts only**. Per-segment
 > values are absent from them entirely — not sparse, not inconsistent: absent. Any segment work
@@ -44,14 +68,22 @@ entity-level figures it is one request instead of one per filing.
 
 ### `https://data.sec.gov/api/xbrl/companyconcept/CIK##########/<taxonomy>/<Tag>.json`
 **Used for:** one concept across every period. **Why:** a targeted refresh or a spot check without
-pulling the whole facts document, which for a large filer is megabytes. Same non-dimensional
-limitation as companyfacts.
+pulling the whole facts document, which for a large filer is megabytes (Microsoft's companyfacts is
+4.9 MB, measured 2026-08-20). Same non-dimensional limitation as companyfacts.
+
+Envelope, verified live: `{ cik, taxonomy, tag, label, description, entityName, units }`, with the
+same `{ end, val, accn, fy, fp, form, filed }` fact rows.
 
 ### `https://www.sec.gov/Archives/edgar/data/<cik>/<accession>/index.json`
 **Used for:** the machine-readable listing of one accession. **Why:** it is how this layer finds
 the XBRL instance document, `FilingSummary.xml`, `MetaLinks.json` and the rendered `R*.htm` files
 — and how it reports, by name, which of those are missing. An accession without an instance
 document is returned as `incomplete-xbrl`, never as an empty result.
+
+**Key names, verified live 2026-08-20.** Hyphenated, not camelCase: `directory['parent-dir']` and
+`item[]['last-modified']`. `item[].size` is a **decimal string**, and `""` for entries EDGAR does
+not size. `item[].type` is an icon file name such as `text.gif`, **not** a form type — nothing
+reads it. This endpoint serves JSON under `content-type: text/html`.
 
 **Timing caveat:** EDGAR generates the rendered artifacts *after* acceptance. A listing fetched
 minutes after a filing is genuinely incomplete rather than authoritative, which is why the TTL for
@@ -64,11 +96,33 @@ source of segment data, per the limitation above.
 
 Returned as text with its content type and **not parsed**. What the contents mean is Ledger's.
 
-### `https://www.sec.gov/Archives/edgar/daily-index/<YYYY>/QTR<n>/form.<YYYYMMDD>.idx`
+### `https://www.sec.gov/Archives/edgar/daily-index/<YYYY>/QTR<n>/<kind>.<YYYYMMDD>.idx`
 **Used for:** everything filed on one day, across all filers. **Why:** refresh scheduling. Polling
 every tracked company's submissions document daily costs one request per company; reading the
 daily index costs one request total and names exactly which companies filed. Filings appear on
 known dates — schedule against them rather than polling.
+
+**Three renderings of the same day, in three different formats.** Verified live against
+2026-08-19 on 2026-08-20. This is not cosmetic: treating them alike parsed an 861 KB file into
+zero records and reported success.
+
+| `kind` | Format | Columns |
+|---|---|---|
+| `master` | pipe-delimited | `CIK\|Company Name\|Form Type\|Date Filed\|File Name` |
+| `form` | fixed width | form type in columns `[0, 17)`, then company name, CIK, date, file name |
+| `company` | fixed width | company name in columns `[0, 62)`, then form type, CIK, date, file name |
+
+**`master` is the default**, because it is the only one whose fields are unambiguously separated.
+The other two are supported and tested — `form.idx` truncates a form type to fit its 17-column
+field (`SEC STAFF ACTIO`), and `company.idx` carries names up to 60 characters against its
+62-column field, so the widths are load-bearing and both boundary cases are pinned in the fixtures.
+
+Dates in the body are `YYYYMMDD` and are normalised to ISO `YYYY-MM-DD` on the way out, so one date
+format leaves this layer. A row's own filing date can differ from the index date — a filing
+disseminated on the 19th may carry the 17th — and that is kept, not corrected.
+
+A file whose body rows all fail to parse returns `schema-mismatch`. A day on which nothing was
+filed returns an empty `ok`. Those are different facts and must not look alike (Invariant 2.2).
 
 ---
 

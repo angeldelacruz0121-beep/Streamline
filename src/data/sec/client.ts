@@ -13,7 +13,7 @@
  */
 import { MemoryCacheStore, type CacheEntry, type CacheStore } from '../cache/store.ts';
 import type { Validated } from '../../types/brand.ts';
-import { parseDailyIndex, type DailyIndexRecord } from './daily-index.ts';
+import { parseDailyIndexDetailed, type DailyIndexRecord } from './daily-index.ts';
 import {
   archiveDocumentUrl,
   companyConceptUrl,
@@ -68,9 +68,22 @@ export interface UnparsedPayload {
 
 export interface CompanySubmissions {
   readonly cik: string;
+  /**
+   * The filer's registered name. Read from the submissions document's `name`
+   * field - submissions has no `entityName`; that spelling is companyfacts'.
+   * The name is kept here so one adapter field means the same thing whichever
+   * endpoint it was read from.
+   */
   readonly entityName: string;
   readonly sic: string | null;
   readonly sicDescription: string | null;
+  /**
+   * EDGAR's `category`, e.g. "Large accelerated filer" - verbatim, unclassified.
+   * It is here because the filing deadline that decides whether a filing is late
+   * depends on it, and it turned out to be present on the submissions document
+   * after all. Whether a filing is late remains Ledger's call (Invariant 2.5).
+   */
+  readonly filerCategory: string | null;
   readonly tickers: readonly string[];
   readonly exchanges: readonly string[];
   readonly fiscalYearEnd: string | null;
@@ -188,9 +201,10 @@ export class EdgarClient {
       provenance: outcome.provenance,
       value: {
         cik: String(index.cik).padStart(10, '0'),
-        entityName: index.entityName,
+        entityName: index.name,
         sic: index.sic ?? null,
         sicDescription: index.sicDescription ?? null,
+        filerCategory: index.category ?? null,
         tickers: index.tickers ?? [],
         exchanges: index.exchanges ?? [],
         fiscalYearEnd: index.fiscalYearEnd ?? null,
@@ -319,21 +333,41 @@ export class EdgarClient {
     return this.#payload(archiveDocumentUrl(cik, accession, fileName), TEXT_ACCEPT);
   }
 
-  /** Everything filed on one day. The discovery feed the refresh schedule runs on. */
+  /**
+   * Everything filed on one day. The discovery feed the refresh schedule runs on.
+   *
+   * Defaults to `master`, which is the pipe-delimited rendering and the only one
+   * whose fields are unambiguously separated. `form` and `company` carry the same
+   * rows fixed-width and are supported, but nothing in this project needs their
+   * ordering, so the delimited feed is the default.
+   *
+   * A file with body rows that all fail to parse returns `schema-mismatch`, not an
+   * empty success. An empty day is a real state; a format change is not, and the
+   * two must not look alike downstream (Invariant 2.2).
+   */
   async getDailyIndex(
     date: string,
-    kind: DailyIndexKind = 'form',
+    kind: DailyIndexKind = 'master',
   ): Promise<EdgarOk<readonly DailyIndexRecord[]> | EdgarFailure> {
     const url = dailyIndexUrl(date, kind);
     const outcome = await this.#retrieve(url, TEXT_ACCEPT);
 
     if (outcome.kind !== 'body') return fromFailure(outcome);
 
-    return {
-      kind: 'ok',
-      provenance: outcome.provenance,
-      value: parseDailyIndex(outcome.entry.body, kind),
-    };
+    const parsed = parseDailyIndexDetailed(outcome.entry.body, kind);
+
+    if (parsed.records.length === 0 && parsed.malformedRows > 0) {
+      return schemaMismatch(outcome.provenance, [
+        {
+          path: [kind],
+          message:
+            `Daily index had ${parsed.malformedRows} body rows and none parsed. ` +
+            'The file format for this index kind has changed.',
+        },
+      ]);
+    }
+
+    return { kind: 'ok', provenance: outcome.provenance, value: parsed.records };
   }
 
   async #payload(url: string, accept: string): Promise<EdgarOk<UnparsedPayload> | EdgarFailure> {

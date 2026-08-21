@@ -39,9 +39,12 @@ export interface FilingTimeliness {
   readonly daysFromPeriodEndToFiling: number | null;
   readonly lateNotificationPresent: boolean;
   /**
-   * Always `false` here. Filer category (large accelerated / accelerated /
-   * non-accelerated) sets the deadline and does not appear in the submissions
-   * index, so this layer never has the input needed to call a filing late.
+   * Always `false` here, but no longer because the input is unavailable: the
+   * submissions document does carry `category` (e.g. "Large accelerated filer"),
+   * and the client now surfaces it as `CompanySubmissions.filerCategory`. This
+   * stays `false` because a deadline is a rule about a filing, and applying that
+   * rule is Ledger's (Invariant 2.5). Transport reports the timing facts and the
+   * category; it does not render the verdict.
    */
   readonly filerCategoryKnown: false;
   readonly classification: 'not-classified-by-transport';
