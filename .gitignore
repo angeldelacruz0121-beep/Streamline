@@ -11,3 +11,6 @@ coverage/
 
 # EDGAR response cache - regenerable, and large.
 .cache/
+
+# Playwright scratch output from the perf gate - regenerated every run.
+test-results/

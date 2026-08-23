@@ -15,3 +15,14 @@ package.json
 dist/
 coverage/
 package-lock.json
+
+# Verbatim captures of the live proxy's response bytes, used as adapter test
+# fixtures. Reformatting them would break the one property that makes them
+# trustworthy: that they are exactly what the server sent (Invariant 4.5).
+src/app/sources/fixtures/
+
+# QA Engineer's adversarial corpus - same reasoning, same invariant. These are
+# the evidence the release gate is judged against; a format pass silently
+# destroys the byte-exactness that makes them evidence at all.
+fixtures/envelopes/
+fixtures/verified/
