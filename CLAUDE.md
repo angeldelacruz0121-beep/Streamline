@@ -22,3 +22,9 @@ yourself. Do not restate the invariants or recap the task before working.
 
 If you iterate three times on one task without converging, stop and report that the task needs a
 stronger model rather than attempting a fourth pass.
+
+Escalate any decision that would be expensive to reverse, even within your
+owned paths and even when it requires no product judgment. Include a
+`Reversible: yes | costly | no` line and explain the consequence in plain
+language. Angel has deep finance expertise and no software background —
+never withhold a decision on the assumption it is too technical for him.

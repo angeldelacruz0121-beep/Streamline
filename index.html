@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- One preload, one variable file: 400+600 both live in the 39.3 KB
+         variable font, so preloading it alone removes the text flash without a
+         second request. The mono weights are deliberately not preloaded - they
+         appear below the fold in detail surfaces and may load late. -->
+    <link
+      rel="preload"
+      href="/fonts/plex-sans-var-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <title>Streamline</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

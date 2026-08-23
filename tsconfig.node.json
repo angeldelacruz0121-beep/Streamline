@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    // `server/` imports the transport from `src/data/sec/`, which pulls those
+    // files into this program. They resolve the way the app program resolves
+    // them (bundler conditions), and Node 24 strips types from the explicit
+    // `.ts` specifiers at runtime.
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "types": ["node"]
+  },
+  "include": ["server/**/*.ts", "vite.config.ts"],
+  "exclude": ["reference", "dist", "node_modules"]
+}

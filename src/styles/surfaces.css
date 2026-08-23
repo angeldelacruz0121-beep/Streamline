@@ -1,0 +1,244 @@
+/**
+ * Surface styling, addressed entirely through Keel's stable `data-surface` /
+ * `data-part` hooks — no file outside Atelier's paths changes to take this.
+ *
+ * The non-success states get the same standard as the success state: a
+ * refusal is where this product demonstrates rigor (decision 0012), so a
+ * refusal renders as an instrument plate — raised surface, hairline ring,
+ * instrument labels, figures in mono — never as a bare error string.
+ * Data-quality states are achromatic throughout: no red, no accent.
+ *
+ * Copy slots deliberately left unfilled render empty and collapse via
+ * `:empty` rather than being authored here (voice.md is unseeded).
+ */
+
+main {
+  min-height: 100dvh;
+  background: var(--surface-ground);
+}
+
+/* ── Instrument label recipe: mono, uppercase, wide. dt everywhere. ─────── */
+
+[data-part='entity'] dt,
+[data-part='filing'] dt,
+[data-part='reconciliation'] dt {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  line-height: var(--lh-micro);
+  font-weight: 400;
+  letter-spacing: var(--track-instrument);
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
+}
+
+/* ── Filing header — provenance first, before the picture ───────────────── */
+
+[data-part='entity'] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-section);
+  row-gap: var(--space-3);
+}
+
+[data-part='entity'] h1 {
+  color: var(--ink-primary);
+}
+
+[data-part='entity'] dl,
+[data-part='filing'] {
+  display: grid;
+  grid-template-rows: auto auto;
+  grid-auto-flow: column;
+  column-gap: var(--space-5);
+  row-gap: var(--space-1);
+}
+
+[data-part='entity'] dd,
+[data-part='filing'] dd {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-label);
+  line-height: var(--lh-label);
+  letter-spacing: var(--track-label);
+  font-weight: 500;
+  color: var(--ink-secondary);
+}
+
+/* ── The renderable surface: header band above, water below ─────────────── */
+
+[data-surface='renderable'] {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--space-3);
+  padding-top: var(--space-5);
+}
+
+[data-surface='renderable'] > header,
+[data-surface='renderable'] > dl,
+[data-surface='renderable'] > ul,
+[data-surface='renderable'] > p {
+  margin-inline: var(--space-5);
+}
+
+/* The canvas region — the only div child is StreamlineCanvas's wrapper. */
+[data-surface='renderable'] > div {
+  flex: 1 1 auto;
+  min-height: var(--canvas-min);
+  margin-top: var(--space-3);
+  background: var(--surface-sunken);
+  border-top: var(--border-hair) solid var(--border-color);
+}
+
+/* Unfilled copy slot (reconciliation wording is Angel's); collapses until written. */
+[data-part='reconciliation-status']:empty,
+[data-part='reported-count']:empty {
+  display: none;
+}
+
+/* ── Data notes — Invariant 2.4, rendered verbatim, achromatic ──────────── */
+
+[data-part='notes'] {
+  display: grid;
+  row-gap: var(--space-2);
+}
+
+[data-part='notes'] li {
+  font-size: var(--text-label);
+  line-height: var(--lh-label);
+  letter-spacing: var(--track-label);
+  color: var(--ink-secondary);
+  border-left: var(--border-hair) solid var(--state-refused-rule);
+  padding-left: var(--space-3);
+}
+
+/* ── Loading — quiet instrument, center stage; motion means "in flight" ─── */
+
+[data-surface='loading'] {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+}
+
+[data-surface='loading'] p {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  line-height: var(--lh-micro);
+  letter-spacing: var(--track-instrument);
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
+  animation: loading-pulse var(--dur-slow) var(--ease) infinite alternate;
+}
+
+@keyframes loading-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+/* ── Idle — deliberately empty (open question Q3); the ground holds it ──── */
+
+[data-surface='idle'] {
+  min-height: 100dvh;
+}
+
+/* ── State plates: every refusal, failure and block, one standard ───────── */
+
+[data-surface='source-failure'],
+[data-surface='invalid-payload'],
+[data-surface='out-of-coverage'],
+[data-surface='segment-identity-unresolved'],
+[data-surface='reconciliation-break'],
+[data-surface='incomplete-filing'],
+[data-surface='no-segment-disclosure'],
+[data-surface='encoding-blocked'] {
+  width: min(var(--measure-plate), calc(100% - 2 * var(--space-5)));
+  margin: var(--space-section) auto;
+  padding: var(--space-5);
+  background: var(--surface-raised);
+  border-radius: var(--radius-plate);
+  box-shadow: var(--ring-edge);
+  display: grid;
+  row-gap: var(--space-4);
+}
+
+[data-part='detail'] {
+  color: var(--ink-secondary);
+}
+
+/* Figures and identifiers inside a plate: mono, hairline-ruled rows. */
+
+[data-part='ranges'] li,
+[data-part='enumerated-members'] li,
+[data-part='missing'] li,
+[data-part='issues'] li {
+  padding-block: var(--space-2);
+  border-top: var(--border-hair) solid var(--state-refused-rule);
+  font-size: var(--text-label);
+  line-height: var(--lh-label);
+  letter-spacing: var(--track-label);
+  color: var(--state-refused);
+}
+
+[data-part='ranges'] li,
+[data-part='enumerated-members'] li {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-part='issues'] code {
+  color: var(--ink-primary);
+}
+
+/* The reconciliation break: the discrepancy IS the content — figures lead. */
+
+[data-part='reconciliation'] {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  align-items: baseline;
+  column-gap: var(--space-section);
+  row-gap: var(--space-2);
+}
+
+[data-part='reconciliation'] dd {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-heading);
+  line-height: var(--lh-heading);
+  font-weight: 500;
+  color: var(--ink-primary);
+  text-align: right;
+}
+
+/* Encoding blocked: each reason names subject, amount and escalation. */
+
+[data-part='reasons'] li {
+  padding-block: var(--space-2);
+  border-top: var(--border-hair) solid var(--state-refused-rule);
+  color: var(--ink-secondary);
+  font-size: var(--text-label);
+  line-height: var(--lh-label);
+  letter-spacing: var(--track-label);
+}
+
+[data-part='escalation'] {
+  display: block;
+  margin-top: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  line-height: var(--lh-micro);
+  letter-spacing: var(--track-micro);
+  color: var(--ink-tertiary);
+}
+
+[data-part='provenance'] {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  line-height: var(--lh-micro);
+  color: var(--ink-tertiary);
+  overflow-wrap: anywhere;
+}

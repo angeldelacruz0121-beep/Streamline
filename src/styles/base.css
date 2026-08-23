@@ -1,0 +1,111 @@
+/**
+ * Base layer: element defaults on the dark ground. Every value is a token.
+ *
+ * Two rules with teeth:
+ * - `font-variant-numeric: tabular-nums` is set at the root and never undone.
+ *   Any figure, anywhere, in either family, must not jitter between values
+ *   (test record 0001 C2). IBM Plex Sans and Mono both carry tabular figures.
+ * - `--accent` appears only on interactive state: focus rings, links,
+ *   selection. It never colours a surface, a border-at-rest, or the canvas.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+  background: var(--surface-ground);
+}
+
+body {
+  margin: 0;
+  background: var(--surface-ground);
+  color: var(--ink-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--track-body);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+dl,
+dd,
+ul,
+ol,
+figure {
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--text-title);
+  line-height: var(--lh-title);
+  letter-spacing: var(--track-title);
+  font-weight: 600;
+}
+
+h2 {
+  font-size: var(--text-heading);
+  line-height: var(--lh-heading);
+  letter-spacing: var(--track-heading);
+  font-weight: 600;
+}
+
+h3 {
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--track-body);
+  font-weight: 500;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: var(--track-label);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: var(--border-hair);
+  text-underline-offset: 0.15em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+::selection {
+  background: var(--accent-quiet);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

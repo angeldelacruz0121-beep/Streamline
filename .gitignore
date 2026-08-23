@@ -1,4 +1,16 @@
 node_modules/
 dist/
+coverage/
+.vite/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
 .DS_Store
 *.local
+
+# EDGAR response cache - regenerable, and large.
+.cache/
+
+# Playwright scratch output from the perf gate - regenerated every run.
+test-results/

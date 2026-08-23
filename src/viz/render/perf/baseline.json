@@ -1,0 +1,10 @@
+{
+  "recorded": "2026-08-21T13:34:59.334Z",
+  "machine": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+  "lockedHz": 60,
+  "p95Ms": 16.80000000000109,
+  "p99Ms": 17.600000000000364,
+  "worstMs": 24.40000000000009,
+  "interactionP95Ms": 8.5,
+  "particleCount": 2955
+}

@@ -10,14 +10,14 @@ Context:     With nine agents and a wave-based sequence in AGENT-PROTOCOL.md §5
              wrong is expensive in the exact way §5 warns about — starting a downstream agent
              before its contract exists produces work that gets thrown away. Angel asked whether
              the sequence should be automated rather than invoking one agent at a time, giving
-             the example of Cartographer doing work that strengthens what Ledger is building.
+             the example of Data Visualization Engineer doing work that strengthens what Financial Data Analyst is building.
 
 Options:     1. Full pipeline automation — a verdict auto-triggers the next agent's plan, which
                 auto-triggers the next, with no approval between.
                 Tradeoff: fastest, but deletes the Check-in A gate that AGENT-PROTOCOL.md §1
-                exists to enforce. A wrong assumption in Ledger's model — the highest-consequence
+                exists to enforce. A wrong assumption in Financial Data Analyst's model — the highest-consequence
                 place in the project, which is why it is pinned to opus — would propagate through
-                Keel, Conduit, and Forge before Angel ever saw it. The protocol's own stated
+                Software Architect, Data Engineer, and Performance Engineer before Angel ever saw it. The protocol's own stated
                 economics ("correcting a plan costs one message; correcting a finished
                 implementation costs a day") argue directly against this.
              2. Auto-launch pre-approved batches — Angel approves several plans in one sitting,
@@ -39,7 +39,7 @@ Decision:    Option 3. `STATUS.md` holds the dependency graph and current agent 
              by logical dependency. Surfacing that distinction is most of the value.
 
 Consequence: Angel remains in the loop on every agent launch — the cost is one approval per
-             agent, deliberately. `STATUS.md` becomes load-bearing: if Archivist does not keep it
+             agent, deliberately. `STATUS.md` becomes load-bearing: if Technical Writer does not keep it
              current, `/next` recommends against stale state, which is worse than no
              recommendation. Mitigated by making `/next` flag drift when STATUS.md and the
              protocol disagree, and by the protocol remaining authority over STATUS.md's state.
@@ -49,6 +49,6 @@ Consequence: Angel remains in the loop on every agent launch — the cost is one
              the skill.
 
              Two pre-existing inconsistencies were found and fixed while encoding the graph:
-             Advocate was listed only as a release gate in §5 but its own file requires it before
+             Product Analyst was listed only as a release gate in §5 but its own file requires it before
              every feature (now recorded in §8 as both), and §7's pinned-agent counts were stale
-             after Atelier was pinned to fable 5.
+             after Art Director was pinned to fable 5.

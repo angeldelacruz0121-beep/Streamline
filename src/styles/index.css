@@ -1,0 +1,13 @@
+/**
+ * The single style entry. Keel's requested line in src/main.tsx:
+ *
+ *   import './styles/index.css';
+ *
+ * Order matters: tokens first (custom properties), fonts (faces), base
+ * (element defaults), surfaces (state styling). Primitive styles travel with
+ * the primitives themselves and are imported by their index, not here.
+ */
+@import '../design/tokens/tokens.css';
+@import './fonts.css';
+@import './base.css';
+@import './surfaces.css';
