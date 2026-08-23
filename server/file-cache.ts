@@ -16,6 +16,15 @@ import type { CacheEntry, CacheStore } from '../src/data/cache/store.ts';
 
 export const DEFAULT_CACHE_DIR = '.cache/edgar';
 
+/** The directory vanished between the last write and this one. */
+function isMissingDirectory(cause: unknown): boolean {
+  return (
+    typeof cause === 'object' &&
+    cause !== null &&
+    (cause as { readonly code?: unknown }).code === 'ENOENT'
+  );
+}
+
 export class FileCacheStore implements CacheStore {
   readonly #dir: string;
   #ready: Promise<void> | null = null;
@@ -34,9 +43,29 @@ export class FileCacheStore implements CacheStore {
     }
   }
 
+  /**
+   * Writes an entry, creating the cache directory if it is not there.
+   *
+   * The retry is not defensive padding, it is a bug fix. `#ensureDir` remembers
+   * that it already created the directory, so once the directory was deleted
+   * underneath a running server - which is exactly what clearing a stale cache
+   * by hand does - every subsequent write failed with ENOENT and the route
+   * turned a perfectly good answer into a transport error. Clearing the cache
+   * while the server is up is a normal thing to do, and it now costs one
+   * recreated directory instead of a dead route.
+   */
   async set(entry: CacheEntry): Promise<void> {
     await this.#ensureDir();
-    await writeFile(this.#pathFor(entry.url), JSON.stringify(entry), 'utf8');
+
+    try {
+      await writeFile(this.#pathFor(entry.url), JSON.stringify(entry), 'utf8');
+    } catch (cause: unknown) {
+      if (!isMissingDirectory(cause)) throw cause;
+
+      this.#ready = null;
+      await this.#ensureDir();
+      await writeFile(this.#pathFor(entry.url), JSON.stringify(entry), 'utf8');
+    }
   }
 
   async delete(url: string): Promise<void> {

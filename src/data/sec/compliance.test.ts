@@ -352,6 +352,11 @@ describe('no credential and no personal address in the repository', () => {
       'PORT',
       'HOST',
       'EDGAR_CACHE_DIR',
+      // Where built segment views are cached. A filesystem path like the one
+      // above, holding public filing data only - nothing secret is written to
+      // either cache, because EDGAR is unauthenticated and this process sends
+      // no credential.
+      'SEGMENTS_CACHE_DIR',
       CONTACT_EMAIL_ENV_VAR,
       'CONTACT_EMAIL_ENV_VAR',
     ]);

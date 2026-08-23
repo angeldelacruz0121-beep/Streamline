@@ -64,6 +64,24 @@ describe('file cache', () => {
     expect(JSON.stringify(entry())).not.toMatch(/authorization|cookie|token/i);
   });
 
+  // The bug: `#ensureDir` remembered it had created the directory, so once the
+  // directory was deleted underneath a running server - which is what clearing
+  // a stale cache by hand does - every later write failed with ENOENT and the
+  // segments route turned a good answer into a transport error. Deleting the
+  // cache while the server runs is a normal thing to do.
+  it('recreates its directory when the cache is cleared underneath a running process', async () => {
+    const scratch = await mkdtemp(join(tmpdir(), 'streamline-vanishing-cache-'));
+    const vanishing = new FileCacheStore(join(scratch, 'segments'));
+
+    await vanishing.set(entry());
+    await rm(join(scratch, 'segments'), { force: true, recursive: true });
+
+    await expect(vanishing.set(entry())).resolves.toBeUndefined();
+    expect((await vanishing.get(URL_UNDER_TEST))?.body).toBe(entry().body);
+
+    await rm(scratch, { force: true, recursive: true });
+  });
+
   it('drops an entry on request and clears the whole directory', async () => {
     await store.set(entry());
     await store.delete(URL_UNDER_TEST);

@@ -126,6 +126,52 @@ filed returns an empty `ok`. Those are different facts and must not look alike (
 
 ---
 
+## Composed reads — `GET /api/edgar/company/:cik/segments`
+
+The eight other proxy routes are one endpoint each. The segments route is the exception: it is the
+only place in this project that composes several, because per-segment figures exist at exactly one
+of them. Order, and why each call is unavoidable:
+
+| # | Endpoint | Why this one |
+|---|---|---|
+| 1 | `submissions/CIK##########.json` | Names the filer (SIC, category, tickers) and is the only list of its filings, so it is also how the current 10-K's accession is found. Re-read per request — see below. |
+| 2 | *(none — derived)* | The filing series, amendment chains and NT notifications are computed from 1 in `filings.ts`. No second request. |
+| 2a | `Archives/.../<amendment>/index.json` | **Only when the period has a 10-K/A.** Does the correction carry an XBRL instance at all? |
+| 2b | `Archives/.../<amendment>/FilingSummary.xml` | **Only when the period has a 10-K/A.** EDGAR's index of the rendered reports inside that correction, read for one thing: whether any of them is a financial statement. See "Which filing is read" below. |
+| 3 | `Archives/.../<accession>/index.json` | What that accession actually contains. There is no other way to learn the instance document's file name, which is filer-specific (`msft-20260630_htm.xml`). |
+| 4 | `Archives/.../<accession>/<instance>_htm.xml` | **The only source of dimensional facts.** `companyfacts` and `companyconcept` carry non-dimensional values only, so neither can answer "revenue for Intelligent Cloud". This is the ~10.9MB document, and decision 0014 keeps it server-side. |
+| 5 | `Archives/.../<accession>/MetaLinks.json` | The filer's own labels and presentation. Without it a segment is a member QName, not a name, and naming it from the tag would invent a disclosure the filer did not make. |
+| 6 | `Archives/.../<accession>/R###.htm` | The rendered segment schedule, read for label wording and ordering only. Skipped when 5 does not point at one. |
+
+Four or five requests per cold company; zero on a warm repeat. 3 through 6 are accessioned bytes and
+are cached immutably, so the recurring cost is 1 alone — and that one is usually a cache hit inside
+its own lifetime.
+
+**Which filing is read — original or correction.** A filer that finds a mistake files a `10-K/A`
+against the same period, and from 2026-08-23 the correction is what Streamline reads: it carries the
+numbers the filer stands behind. The rule is "the newest filing for the period that actually carries
+a financial-statement exhibit", and the qualifier is not caution, it is the shape of real filings.
+HP's FY2019 correction (`0001206774-20-000632`) renders exactly one report and it is the cover page;
+its base taxonomy is `dei` only. Reading it as authoritative would blank a year that is currently
+right. HP's FY2022 correction (`0000047217-23-000075`) renders 145, seven of them statements, and it
+must supersede. The submissions flags cannot tell those apart — cover-page tagging has been mandatory
+since 2019, so both are `isInlineXBRL: 1` — which is why 2a and 2b exist. A correction that is passed
+over is reported in the response, never dropped. If 2a or 2b cannot be read, the route refuses rather
+than serving the superseded original. Rule and reasoning in `authoritative.ts`.
+
+**What this costs.** Nothing for a period with no correction, which is every filer in the corpus
+today: 2a and 2b are not issued at all. A period with a correction costs those two once, against
+accessioned bytes that are then cached forever.
+
+**Why 1 is re-read on every request.** The built view is cached against the accession it came from
+and never expires, which is only safe because the route asks *which accession is current* again each
+time. That question is answered by the submissions index on its own lifetime (1h during acceptance
+hours), so a newly filed 10-K appears when EDGAR says it exists rather than when a derived cache
+happens to expire. Concurrent requests coalesce so a burst still asks once. Full reasoning in
+`../cache/TTL-POLICY.md`.
+
+---
+
 ## Known, documented, deliberately not implemented in v1
 
 ### Full-text search — `https://efts.sec.gov/LATEST/search-index?q=...`
