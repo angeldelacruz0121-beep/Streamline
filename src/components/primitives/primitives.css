@@ -1,0 +1,55 @@
+/**
+ * Primitive styles. Addressed by `data-primitive`, values by token only.
+ * Imported once by the primitives index so a primitive cannot render
+ * unstyled wherever it is adopted.
+ */
+
+/* A financial figure. Mono, tabular, must never jitter (0001 C2). */
+[data-primitive='figure'] {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: var(--track-label);
+  color: var(--ink-primary);
+}
+
+[data-primitive='figure'][data-dim='true'] {
+  color: var(--ink-secondary);
+}
+
+/* An instrument label. Mono, uppercase, wide — the chrome voice of the product. */
+[data-primitive='instrument-label'] {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  line-height: var(--lh-micro);
+  font-weight: 400;
+  letter-spacing: var(--track-instrument);
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
+}
+
+/* A raised plate. Depth is a lightness step plus one hairline ring — no glass. */
+[data-primitive='plate'] {
+  background: var(--surface-raised);
+  border-radius: var(--radius-plate);
+  box-shadow: var(--ring-edge);
+  padding: var(--space-5);
+}
+
+/* The separation rule (Q1). A hairline that states a boundary, nothing more. */
+[data-primitive='rule'] {
+  border: none;
+  margin: 0;
+  background: var(--surface-rule);
+}
+
+[data-primitive='rule'][aria-orientation='vertical'] {
+  width: var(--border-hair);
+  height: auto;
+  align-self: stretch;
+}
+
+[data-primitive='rule'][aria-orientation='horizontal'] {
+  height: var(--border-hair);
+  width: auto;
+}

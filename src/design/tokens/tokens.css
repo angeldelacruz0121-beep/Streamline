@@ -1,0 +1,108 @@
+/**
+ * Streamline design tokens — transcribed from DESIGN.md "TOKENS (BINDING)".
+ *
+ * This file is the only source of visual values in the product. A hex or px
+ * literal anywhere else in src/ is a defect (see no-hardcoded-values.test.ts).
+ * Values here are DESIGN.md's, verbatim; amendments require re-running /taste
+ * on the dimension, not editing this file to taste.
+ *
+ * The water ramp is DERIVED FROM MEASUREMENT (photographic luminance
+ * percentiles, 8-10% saturation). Tuning inside the measured envelope —
+ * L within P05 12-31 / P50 43-89 / P95 172-221, saturation within 2-10% —
+ * is expected and happens with Angel on sight. Leaving the envelope is a
+ * departure from evidence and goes in DESIGN.md OVERRIDES first.
+ */
+:root {
+  /* ── Surfaces ─────────────────────────────────────────────────────────── */
+  --surface-ground: rgb(18, 19, 29); /* app background */
+  --surface-raised: rgb(30, 32, 41); /* panels, header, legend plate */
+  --surface-sunken: rgb(20, 20, 20); /* canvas bed, behind the water */
+  --surface-rule: rgba(255, 255, 255, 0.08); /* the Q1 separation rule */
+
+  /* ── Ink — one ink, four weights; alpha, not new grays ────────────────── */
+  --ink-primary: rgb(255, 255, 255);
+  --ink-secondary: rgba(255, 255, 255, 0.72);
+  --ink-tertiary: rgba(255, 255, 255, 0.5);
+  --ink-faint: rgba(255, 255, 255, 0.2); /* hairlines and disabled only — never text (fails AA) */
+
+  /* ── Water — measured ramp, load-bearing; see file header ─────────────── */
+  --water-deep: rgb(28, 29, 31); /* L≈29  · matches P05 12-31   */
+  --water-mid: rgb(64, 66, 71); /* L≈66  · matches P50 43-89   */
+  --water-shallow: rgb(101, 104, 112); /* L≈104 */
+  --water-specular: rgb(196, 201, 212); /* L≈201 · matches P95 172-221 */
+
+  /* ── Accent — UI STATE ONLY. Forbidden on the canvas. ─────────────────── */
+  --accent: rgb(46, 167, 255);
+  --accent-quiet: rgba(46, 167, 255, 0.16);
+
+  /* ── Data-quality states — deliberately achromatic (decision 0012) ────── */
+  --state-refused: rgba(255, 255, 255, 0.5);
+  --state-refused-rule: rgba(255, 255, 255, 0.16);
+
+  /* ── Type scale — six steps; tracking per apple-macbook-pro's direction ── */
+  --text-display: 40px;
+  --lh-display: 1;
+  --track-display: -0.022em;
+  --text-title: 28px;
+  --lh-title: 1.05;
+  --track-title: -0.016em;
+  --text-heading: 20px;
+  --lh-heading: 1.2;
+  --track-heading: -0.01em;
+  --text-body: 16px;
+  --lh-body: 1.5;
+  --track-body: 0;
+  --text-label: 13px;
+  --lh-label: 1.3;
+  --track-label: 0.01em;
+  --text-micro: 11px;
+  --lh-micro: 1.35;
+  --track-micro: 0.02em;
+
+  /* Instrument labels — mono, uppercase, wide. */
+  --track-instrument: 0.18em;
+
+  /* ── Type families — self-hosted; stacks per DESIGN.md ────────────────── */
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
+
+  /* ── Spacing — 4px base; components stop at 24, sections start at 64.
+        The 24→64 gap is intentional. Do not fill it. ─────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-section: 64px;
+  --space-section-lg: 104px;
+
+  /* ── Shape — near-square, a corner that is not a rounded style ────────── */
+  --radius: 2px;
+  --radius-plate: 6px;
+  --border-hair: 1px;
+  --border-color: rgba(255, 255, 255, 0.12);
+
+  /* ── Depth — lightness steps, not shadow stacks ───────────────────────── */
+  --ring-edge: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --shadow-lift: 0 16px 48px rgba(0, 0, 0, 0.55);
+
+  /* ── Motion (UI chrome only — canvas motion is Forge's rate-locked
+        system and is NOT governed here) ────────────────────────────────── */
+  --dur-fast: 150ms;
+  --dur-base: 300ms;
+  --dur-slow: 500ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/*
+ * DERIVED VALUES — not in DESIGN.md's TOKENS block; derived by this build and
+ * recorded for DESIGN.md's DERIVED VALUES table (appended by /taste, not here).
+ * Both sit on the 4px grid.
+ *   --measure-plate: 45 × --text-body. The readable measure for a state plate.
+ *   --canvas-min:    120 × the 4px base. Floor for the canvas region so the
+ *                    legend band (96px) never crowds the picture.
+ */
+:root {
+  --measure-plate: 720px;
+  --canvas-min: 480px;
+}

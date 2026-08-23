@@ -1,0 +1,49 @@
+/**
+ * Self-hosted type per DESIGN.md's asset manifest. Latin subsets, woff2,
+ * served from /fonts/ (public/, stable URLs — Angel's ruling 2026-08-21).
+ * The shipped site never references a third-party font host.
+ *
+ * IBM Plex Sans arrives as ONE variable file carrying the whole 400-600
+ * weight range (39.3 KB of the 60 KB budget), so the DESIGN.md requirement to
+ * preload 400 + 600 is satisfied by a single preload link — Keel's line in
+ * index.html:
+ *
+ *   <link rel="preload" href="/fonts/plex-sans-var-latin.woff2"
+ *         as="font" type="font/woff2" crossorigin>
+ *
+ * `font-display: swap` is the deliberate choice (performance.md requires one):
+ * figures must never be invisible, and with the preload in place the swap
+ * window on first paint is negligible.
+ */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/plex-sans-var-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/plex-mono-400-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/plex-mono-500-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
