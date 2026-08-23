@@ -26,8 +26,8 @@ Options:     1. Rate wins — hold 60fps, thin the visuals to get there. The exi
              2. Quality wins — lock to a lower clean divisor and keep render quality.
                 Tradeoff: less headroom for hitches, and requires input handling to be genuinely
                 decoupled from the render loop or the app will feel slow at 30fps.
-             3. Per-feature escalation — no standing rule; Forge escalates each costly effect.
-                Tradeoff: maximum control, but Forge stalls on every expensive visual and Angel
+             3. Per-feature escalation — no standing rule; Performance Engineer escalates each costly effect.
+                Tradeoff: maximum control, but Performance Engineer stalls on every expensive visual and Angel
                 answers the same question repeatedly.
 
 Decision:    Option 2, with an explicit floor. Framerate is a floor to defend, not a target to
@@ -41,19 +41,19 @@ Decision:    Option 2, with an explicit floor. Framerate is a floor to defend, n
              under 100ms, measured independently of render rate, with any interaction gated behind
              the render loop a hard fail.
 
-             Forge is explicitly instructed not to bank framerate above the floor. Headroom belongs
+             Performance Engineer is explicitly instructed not to bank framerate above the floor. Headroom belongs
              to the picture; comfortable 60fps with a picture that could be richer is a finding to
              report, not a result to protect.
 
-Consequence: Forge's harness must measure two things, not one, and must express pacing against the
+Consequence: Performance Engineer's harness must measure two things, not one, and must express pacing against the
              locked interval rather than a target FPS. Input handling has to be architecturally
              decoupled from the render loop — this is now a correctness requirement, not an
-             optimization, and Keel's state model has to accommodate it.
+             optimization, and Software Architect's state model has to accommodate it.
 
              The 30fps floor is assumed, not measured. It is defensible for continuous fluid
              motion, which is what Streamline renders, but it has not been validated on the
-             reference machine. If Forge's harness shows 30 reads as choppy for this specific
-             motion, that is a finding that reopens this record rather than something Forge
+             reference machine. If Performance Engineer's harness shows 30 reads as choppy for this specific
+             motion, that is a finding that reopens this record rather than something Performance Engineer
              works around.
 
              Forecloses "we hit 60, ship it" as a performance argument. Also forecloses average

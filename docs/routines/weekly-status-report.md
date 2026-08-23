@@ -21,7 +21,7 @@ Read, in this order:
 - `STREAMLINE-INVARIANTS.md` — current invariants and the open decisions table
 - `AGENT-PROTOCOL.md` — ownership map
 - `docs/decisions/` — all records, noting any added in the last 7 days
-- `docs/product/` — Advocate's two-audience tests and kill list
+- `docs/product/` — Product Analyst's two-audience tests and kill list
 - `git log --since="last Monday" --stat`
 - Test results and any performance harness output, including the full frame-time distribution
 - Any open items or gaps recorded in verdicts
@@ -58,7 +58,7 @@ Save to `reports/Streamline_Status_YYYY-MM-DD.pdf`.
 
 ## Why this exists
 
-The report can only read what is on disk. That makes it a forcing function: Archivist's decision
-records, Adversary's test results and Forge's performance output stop being optional and become
+The report can only read what is on disk. That makes it a forcing function: Technical Writer's decision
+records, QA Engineer's test results and Performance Engineer's performance output stop being optional and become
 the report's raw material. A thin report is itself the signal that the protocol is not being
 followed.

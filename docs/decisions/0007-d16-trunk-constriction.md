@@ -11,8 +11,8 @@ Context:     Verifying the first slice's target data surfaced a structural gap t
              earnings, and report §5.2 makes "a lake whose area is set by actual reported net
              income" part of the launch gate. For Microsoft FY2026 those are different numbers:
              segment operating income sums to $155,237M (verified: 83,879 + 56,972 + 14,386, tying
-             exactly to the disclosed total), while consolidated net income is $133,700M. The
-             $21,537M between them is tax and non-operating items — real, reported, and attributable
+             exactly to the disclosed total), while consolidated net income is $133,749M. The
+             $21,488M between them is tax and non-operating items — real, reported, and attributable
              to no individual segment.
 
              As specified, the visual did not conserve. Something had to carry that gap.
@@ -32,7 +32,7 @@ Options:     1. A final shared constriction after the confluence, carrying tax a
 Decision:    Option 1. The rivers merge into a trunk; the trunk passes through one final shared
              constriction before the lake. The lake remains consolidated net earnings.
 
-             Option 3 was rejected under Ledger's charter — "if no defensible method exists for a
+             Option 3 was rejected under Financial Data Analyst's charter — "if no defensible method exists for a
              cost category, the correct output is not disclosed, not an estimate" — and would have
              put invented geometry into the slice whose entire gate is that no figure is invented.
 
@@ -51,7 +51,7 @@ Consequence: Invariant 1 and 3.2 amended to describe the trunk and the confluenc
              not reach shareholders. It is fully reported, so it costs the slice nothing in
              traceability.
 
-             Cartographer now owns a geometry the prototype has no equivalent of — a confluence and
+             Data Visualization Engineer now owns a geometry the prototype has no equivalent of — a confluence and
              a shared constriction — which is new work, not a port from reference/prototype/.
 
              Opened as a consequence, not blocking the slice: Invariant 2.4 mandates a 0.5%
@@ -60,3 +60,28 @@ Consequence: Invariant 1 and 3.2 amended to describe the trunk and the confluenc
              consolidated operating income, and Oracle's segment profit measure excludes stock
              compensation and amortisation so the gap is definitional rather than an error.
              Recorded as D18, to be answered before company two.
+
+---
+
+## Amendments
+
+**2026-08-20 — Consolidated net income and trunk residual figures corrected.**
+
+Original figures: consolidated net income $133,700M, trunk residual $21,537M.
+
+Correct figures: consolidated net income $133,749M, trunk residual $21,488M.
+
+Source: SEC XBRL instance for accession 0001193125-26-323660, period 2025-07-01 → 2026-06-30.
+Wire value: us-gaap:NetIncomeLoss = 133,749,000,000 (decimals="-6"), verified against
+companyconcept API and reconciled against disclosed tax and non-operating items.
+
+The $49M difference ($133,749M − $133,700M) reflects precision loss in rounding; $133,700M is
+$133.7B to one decimal place. Invariant 2.2 and decision 0010 establish that the wire wins.
+
+**Argument survives.** The decision's reasoning — that tax and non-operating items are carried
+after the confluence as a shared trunk constriction — is unaffected by the correction. The trunk
+is still shared, still carries these items, and still teaches that $21.488B (not $21.537B) of
+Microsoft's operating profit does not reach shareholders. The traceability is unchanged.
+
+See 0016-slice-figures-corrected-process-lesson.md for the discovery story and independent
+verification.

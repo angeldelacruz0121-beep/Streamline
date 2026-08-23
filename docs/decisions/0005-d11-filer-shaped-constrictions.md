@@ -46,22 +46,22 @@ Decision:    Option 2. Each river carries exactly the categories its filer discl
 
              Option 3 was rejected on evidence rather than taste. The only sourceable allocation
              basis is revenue share, which forces every segment to an identical margin — refuted by
-             Microsoft's own disclosed segment gross margins of 81%, 62% and 54%, computed from data
+             Microsoft's own disclosed segment gross margins of 82%, 58% and 57%, computed from data
              in the same table. It would also erase precisely what Invariant 1 promises the visual
              conveys, that "a river that stays wide signals efficiency." The alternatives fail too:
              segment headcount is not disclosed anywhere in EDGAR, and relative gross margin
              requires the segment cost of revenue that would be the figure under derivation.
-             Ledger's charter is dispositive — "if no defensible method exists for a cost category,
+             Financial Data Analyst's charter is dispositive — "if no defensible method exists for a cost category,
              the correct output is not disclosed, not an estimate."
 
              Invariants 3.1 and 3.2 make the width itself the quantitative claim, so a
              derived-styled constriction is still a wrong number drawn to scale. Styling cannot
              defend it.
 
-Consequence: Invariant 3.2 amended to permit a variable, filer-determined constriction set. Ledger
+Consequence: Invariant 3.2 amended to permit a variable, filer-determined constriction set. Financial Data Analyst
              needs a per-filer extraction rule set and a documented category-mapping table. Adobe
              is now a known decline case — segment revenue and gross margin only, with no segment
-             operating income — and is the first live test of Cartographer's clause that Streamline
+             operating income — and is the first live test of Data Visualization Engineer's clause that Streamline
              should decline to render a company whose shape breaks the metaphor, rather than invent
              a second constriction.
 
@@ -70,3 +70,26 @@ Consequence: Invariant 3.2 amended to permit a variable, filer-determined constr
              methodology" for cost of revenue and "relative gross margin" for operating expenses.
              They are reported and XBRL-tagged, yet not directly measured. Invariant 2.3's binary
              `reported | derived` cannot express this. Opened as D18's sibling, D17.
+
+---
+
+## Amendments
+
+**2026-08-20 — Segment gross margin figures corrected.**
+
+Original figures: Productivity 81%, Intelligent Cloud 62%, More Personal Computing 54%.
+
+Correct figures (from wire extraction, fixture at src/data/normalize/__fixtures__/msft-fy2026.ts):
+Productivity 82.13%, Intelligent Cloud 58.00%, More Personal Computing 56.56%.
+
+Differences:
+- Intelligent Cloud: −4.13 percentage points (62% vs 58%)
+- More Personal Computing: +2.56 percentage points (54% vs 56.56%)
+- Productivity: +1.13 percentage points (81% vs 82.13%)
+
+**Argument survives.** The decision's reasoning — that a uniform-margin allocation basis is
+refuted by the actual diversity of disclosed segment margins — is unaffected. The corrected
+margins (82%, 58%, 57% rounded) show the same diversity as the original figures did. The
+refutation of the revenue-share allocation basis is just as strong.
+
+See 0016-slice-figures-corrected-process-lesson.md for context on the correction.

@@ -5,7 +5,7 @@ Status:      accepted
 Decided by:  Angel
 
 Context:     Invariant 4.6 requires a descriptive User-Agent containing a real contact email on
-             every EDGAR request, enforced in code rather than by convention. Conduit's Workstream 1
+             every EDGAR request, enforced in code rather than by convention. Data Engineer's Workstream 1
              plan proposed hardcoding Angel's personal address as a fail-closed constant, and
              correctly flagged the exposure question rather than proceeding quietly.
 
@@ -45,11 +45,11 @@ Decision:    Option 3, and the variable is left **unset** for now.
              variable and why SEC requires it. `.env` and `.env.*` are gitignored; a `.env.example`
              ships the key with an empty value and no address.
 
-             The entire test suite must pass with the variable unset. Conduit's design already
+             The entire test suite must pass with the variable unset. Data Engineer's design already
              delivers this — zero live EDGAR requests in tests, everything against a local
              `node:http` double — so nothing is blocked by leaving it empty.
 
-Consequence: **Standing constraint for every agent, not just Conduit: no email address, personal or
+Consequence: **Standing constraint for every agent, not just Data Engineer: no email address, personal or
              otherwise, is committed to this repository in any file, default, fixture, or comment.**
 
              Live EDGAR data cannot be pulled until Angel sets the variable locally. That is
@@ -65,7 +65,7 @@ It is set in a gitignored `.env`, mode 600, and appears in no tracked file.
 
 Verified the same day: the first live request this project has made to SEC returned HTTP 200 and
 the expected filing — `0001193125-26-323660`, Microsoft Corp, SIC 7372 — confirming the coverage
-test in Invariant §1 against production rather than against a fixture. Known gap 5 in Conduit's
+test in Invariant §1 against production rather than against a fixture. Known gap 5 in Data Engineer's
 Workstream 1 verdict ("zero live EDGAR verification") is closed.
 
 Two things a future reader should not have to rediscover. SEC's policy page phrases the header as

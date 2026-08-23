@@ -45,11 +45,11 @@ Decision:    Option 2. The binding condition is quoted from report §5.2 and is 
              the system survives three companies the foundation is sound; if it does not, the defect
              surfaces at three rather than at thirty.
 
-Consequence: Advocate now has an explicit list to enforce, and any proposal from the exclusion list
+Consequence: Product Analyst now has an explicit list to enforce, and any proposal from the exclusion list
              is refused by reference to this record rather than re-argued. Forecloses feature work
              until the slice is complete.
 
              A gap in the report is corrected here: its §7 workstream table begins at EDGAR
              ingestion, but the repository has no project to ingest into — no package.json, no
-             TypeScript configuration, no test runner. Conduit's gate requires tests, so a Keel
+             TypeScript configuration, no test runner. Data Engineer's gate requires tests, so a Software Architect
              scaffold workstream precedes it. See 0007's consequence note.

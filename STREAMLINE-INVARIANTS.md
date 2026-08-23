@@ -45,7 +45,7 @@ sectors are added deliberately, one at a time, each with its own income-statemen
 
 ## 2. Data truth rules
 
-Enforced by Ledger. Non-negotiable.
+Enforced by Financial Data Analyst. Non-negotiable.
 
 **2.1 Source.** All financial data comes directly from SEC EDGAR — 10-K, 10-Q, 8-K, and their
 XBRL company facts. No commercial data vendors in v1. SEC data is public and unrestricted for
@@ -81,7 +81,7 @@ reporting period past the filer's expected filing date is flagged in the UI.
 
 ## 3. Visual encoding rules
 
-Enforced by Cartographer. Non-negotiable.
+Enforced by Data Visualization Engineer. Non-negotiable.
 
 **3.1 Width is dollars.** River width is strictly linearly proportional to dollars on a
 documented scale. No perceptual tuning, no square-root softening, no per-company rescaling for
@@ -255,7 +255,7 @@ purposeful, never ornamental easing. Density over whitespace where an analyst is
 needs life and physical presence, not saturation. Naturalism is pursued through motion behavior,
 silhouette, surface, and light — never through refraction, caustics, or physically-based water
 shading, which will not hold the frame budget on reference hardware even at the 30fps floor.
-Forge costs any proposed approach before Atelier commits to it.
+Performance Engineer costs any proposed approach before Art Director commits to it.
 
 **Color is encoding, not decoration.** The palette stays restrained. Where color distinguishes
 segments it is a stable hue per segment, consistent across periods and across filers, documented
@@ -285,12 +285,12 @@ Open — agents escalate rather than decide:
 
 | # | Decision | Blocks | Current default |
 |---|---|---|---|
-| D9 | Growth-to-speed mapping bounds | Cartographer | −20%→0.5×, +40%→2.0×, clamped |
-| D10 | SIC ranges are a proxy for "tech" and will miss or wrongly include some filers | Ledger, Advocate | SIC 3570–3579, 7370–7379 |
-| D12 | Default period on load: latest fiscal year, latest quarter, or TTM | Advocate, Keel | latest fiscal year |
-| D15 | Which segment-hue set, once color becomes an encoding | Cartographer, Atelier | none assigned yet |
-| D17 | A third provenance state. 2.3's binary `reported \| derived` cannot express a figure that is reported and XBRL-tagged yet is the filer's own internal allocation — Microsoft states its segment cost of revenue is allocated "based on a relative revenue methodology". Not blocking the slice; needed before the analyst detail panel | Ledger, Advocate | binary, with the filer's method quoted in the panel |
-| D18 | A profit-side reconciliation rule. 2.4 mandates 0.5% on revenue only, but the river-into-lake metaphor asserts one on profit too. Microsoft is clean (segments sum to operating income exactly); Apple leaves $42.6B unallocated and Oracle's segment profit measure is not GAAP operating income | Ledger, Cartographer | none — escalate on first failing filer |
+| D9 | Growth-to-speed mapping bounds | Data Visualization Engineer | −20%→0.5×, +40%→2.0×, clamped |
+| D10 | SIC ranges are a proxy for "tech" and will miss or wrongly include some filers | Financial Data Analyst, Product Analyst | SIC 3570–3579, 7370–7379 |
+| D12 | Default period on load: latest fiscal year, latest quarter, or TTM | Product Analyst, Software Architect | latest fiscal year |
+| D15 | Which segment-hue set, once color becomes an encoding | Data Visualization Engineer, Art Director | none assigned yet |
+| D17 | A third provenance state. 2.3's binary `reported \| derived` cannot express a figure that is reported and XBRL-tagged yet is the filer's own internal allocation — Microsoft states its segment cost of revenue is allocated "based on a relative revenue methodology". Not blocking the slice; needed before the analyst detail panel | Financial Data Analyst, Product Analyst | binary, with the filer's method quoted in the panel |
+| D18 | A profit-side reconciliation rule. 2.4 mandates 0.5% on revenue only, but the river-into-lake metaphor asserts one on profit too. Microsoft is clean (segments sum to operating income exactly); Apple leaves $42.6B unallocated and Oracle's segment profit measure is not GAAP operating income | Financial Data Analyst, Data Visualization Engineer | none — escalate on first failing filer |
 
 ---
 

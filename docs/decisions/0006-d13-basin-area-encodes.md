@@ -59,7 +59,7 @@ Consequence: A misreading no option escaped is now defended explicitly in 3.4: a
              must visibly re-fill or re-drain the basin so the state reads as belonging to that
              period.
 
-             This decision constrains Cartographer's lake work even though the first slice cannot
+             This decision constrains Data Visualization Engineer's lake work even though the first slice cannot
              exercise it — Microsoft is profitable. The area constant must be defined once, for both
              signs, rather than settled for profit and retrofitted for loss.
 

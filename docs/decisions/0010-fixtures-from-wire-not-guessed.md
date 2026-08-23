@@ -4,7 +4,7 @@ Date:        2026-08-20
 Status:      accepted
 Decided by:  Angel
 
-Context:     Conduit's Workstream 1 suite achieved 120 of 120 passing tests while five structural
+Context:     Data Engineer's Workstream 1 suite achieved 120 of 120 passing tests while five structural
              defects lay dormant in the schemas and the envelope parsing logic. The defects were
              invisible because the test fixtures had been hand-authored from the same assumptions
              the schemas encoded. A fixture written from a guess validates the guess, not the
@@ -62,20 +62,20 @@ Decision:    Option 2, standing for every agent that touches an external service
              non-empty input yields no records. The distinction is the function's job, not the
              caller's.
 
-Consequence: Conduit's `src/data/sec/__fixtures__/microsoft.ts` and `shape-probes.ts` are
+Consequence: Data Engineer's `src/data/sec/__fixtures__/microsoft.ts` and `shape-probes.ts` are
              re-sourced from live EDGAR responses, with hand-composition eliminated. The test
              suite in `schemas.test.ts` now asserts field names by name (e.g., "takes the filer
              name from submissions.name, not submissions.entityName") rather than by absence of
              complaint.
 
              This standing rule applies to every agent that integrates an external service:
-             Ledger (if consuming an alternative data source), Cartographer (if pulling visual
-             assets), Forge (if rendering depends on environment or browser APIs), Atelier (if
-             using external design systems), Adversary (if targeting external accessibility
-             services), and Advocate (if the audience is external). Every fixture is captured,
+             Financial Data Analyst (if consuming an alternative data source), Data Visualization Engineer (if pulling visual
+             assets), Performance Engineer (if rendering depends on environment or browser APIs), Art Director (if
+             using external design systems), QA Engineer (if targeting external accessibility
+             services), and Product Analyst (if the audience is external). Every fixture is captured,
              never guessed.
 
-             The fix closed a known gap that Conduit's 2026-08-20 verdict noted: "zero live EDGAR
+             The fix closed a known gap that Data Engineer's 2026-08-20 verdict noted: "zero live EDGAR
              verification." The first live request now passes, and the five schema defects are
              proven to have existed and been corrected.
 

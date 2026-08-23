@@ -4,33 +4,33 @@ Date:        2026-08-20
 Status:      accepted
 Decided by:  Angel
 
-Context:     Keel's Workstream 0 plan surfaced two decisions Angel had to make before any code
+Context:     Software Architect's Workstream 0 plan surfaced two decisions Angel had to make before any code
              could be written: a gap in the ownership rules, and the project's full third-party
              dependency set (an escalation under AGENT-PROTOCOL.md §3).
 
-             The ownership gap: §2 assigns `tests/` to Adversary and states that agents write only
+             The ownership gap: §2 assigns `tests/` to QA Engineer and states that agents write only
              inside owned paths. Read literally, no agent could write a test for its own code. That
-             collides with almost every agent's definition of done — Conduit's gate is "tests prove
-             both controls cannot be bypassed", Ledger's requires a failing test proving
+             collides with almost every agent's definition of done — Data Engineer's gate is "tests prove
+             both controls cannot be bypassed", Financial Data Analyst's requires a failing test proving
              reconciliation catches a broken sum — so as written, every agent would block on
-             Adversary before it could report anything finished.
+             QA Engineer before it could report anything finished.
 
-Options:     1. Keep §2 literal — all tests in `tests/`, only Adversary writes them.
-                Tradeoff: one clean ownership line and Adversary sees all coverage. But it makes
-                Adversary a bottleneck on every other agent's completion, and agents would report
+Options:     1. Keep §2 literal — all tests in `tests/`, only QA Engineer writes them.
+                Tradeoff: one clean ownership line and QA Engineer sees all coverage. But it makes
+                QA Engineer a bottleneck on every other agent's completion, and agents would report
                 verdicts on work they had not themselves verified, which is precisely what the
                 verdict format exists to prevent.
              2. Colocated tests belong to the source owner; `tests/` and `fixtures/` stay
-                Adversary's.
+                QA Engineer's.
                 Tradeoff: two places tests can live, requiring the convention to be written down —
-                but each agent can prove its own work, and Adversary keeps the independent check.
+                but each agent can prove its own work, and QA Engineer keeps the independent check.
 
 Decision:    Option 2. A test colocated with its source belongs to whoever owns that source.
-             `tests/` and `fixtures/` remain entirely Adversary's, holding the standing adversarial
-             set and the release gate. `tests/infra/` is Keel's shared harness.
+             `tests/` and `fixtures/` remain entirely QA Engineer's, holding the standing adversarial
+             set and the release gate. `tests/infra/` is Software Architect's shared harness.
 
              The distinction that matters: colocated tests are an agent checking its own work;
-             Adversary is the check that does not report to the thing being checked. Both exist, and
+             QA Engineer is the check that does not report to the thing being checked. Both exist, and
              the second is not weakened by the first.
 
              **Dependency set approved in full** (all versions verified present on npm before
@@ -47,7 +47,7 @@ Decision:    Option 2. A test colocated with its source belongs to whoever owns 
              runtime schema check at the pipeline boundary, and inferring the TypeScript type from
              the schema means the type and the check cannot silently diverge, which a hand-rolled
              validator cannot guarantee. Vitest is not a default: its fake timers are what make
-             Conduit's 10 requests/second control testable without wall-clock waits.
+             Data Engineer's 10 requests/second control testable without wall-clock waits.
 
              Explicitly not added, and why, so they are not re-proposed: `react-router` (a
              discriminated route union gives compile-time exhaustiveness over the five non-success
@@ -59,5 +59,5 @@ Consequence: AGENT-PROTOCOL.md §2 amended with the tests paragraph. Every agent
              colocated tests, and no agent may treat `tests/` or `fixtures/` as its own.
 
              Flagged forward, not pre-approved: canvas rendering cannot be tested in jsdom, so
-             Forge's render-correctness work will require browser mode and Playwright. That is a
+             Performance Engineer's render-correctness work will require browser mode and Playwright. That is a
              future dependency escalation and is not authorised by this record.
