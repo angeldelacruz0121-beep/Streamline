@@ -146,7 +146,7 @@ escalate-only.
 | Q3 | First-run experience specification | Product Analyst | Unwritten; blocked by D10 and D12. Empty-state IA and company selection can proceed. (docs/decisions/0019-q3-first-run-experience.md) |
 | Q4 | Net vs. decomposed rendering of trunk residual | Data Visualization Engineer | Tax expense hidden in netting: $32,185M true cost vs. $21,488M net. Angel's direction (0031): tax gets its own surface, not folded into pinch. Option 3 (annotated pinch) for slice; option 2 (decomposed) at company two. (docs/decisions/0020-q4-trunk-net-vs-decomposed.md) |
 
-**Answered:** D1–D8, D11 (docs/decisions/0005-d11-filer-shaped-constrictions.md), D13 (docs/decisions/0006-d13-basin-area-encodes.md), D14, D16 (docs/decisions/0007-d16-trunk-constriction.md), Q1 (docs/decisions/0017-q1-river-lake-junction-geometry.md), 0028–0031, 0034 — settled in `docs/decisions/` with full reasoning, and not revisited without amendment.
+**Answered:** D1–D8, D11 (docs/decisions/0005-d11-filer-shaped-constrictions.md), D13 (docs/decisions/0006-d13-basin-area-encodes.md), D14, D16 (docs/decisions/0007-d16-trunk-constriction.md), Q1 (docs/decisions/0017-q1-river-lake-junction-geometry.md), 0028–0031, 0034, 0035 (docs/decisions/0035-the-lake-is-the-company-as-a-whole.md — the lake **is the company as a whole**; net earnings is its magnitude, not its meaning. Invariants §1 and 3.3 amended 2026-08-23; no geometry change, binding on copy and the analyst detail panel) — settled in `docs/decisions/` with full reasoning, and not revisited without amendment.
 
 **PENDING:** 0032 (Meta loss-making segment geometry) — Angel researching before ruling. Three options on the table with rider conditions. (docs/decisions/0032-meta-loss-making-segment-three-options-pending.md)
 

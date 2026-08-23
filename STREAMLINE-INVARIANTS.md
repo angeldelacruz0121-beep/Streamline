@@ -13,7 +13,15 @@ Streamline visualizes a company's earnings as a lake fed by rivers of revenue.
 Each river is one reportable revenue segment. As it flows toward the lake it passes through
 constriction points representing costs that reduce the flow. The rivers then merge into a single
 trunk, which passes through one final shared constriction — tax and non-operating items — before
-reaching the lake. The lake is net earnings: what survived the whole journey.
+reaching the lake.
+
+**The lake is the company as a whole.** Each river is one part of the business; the lake is the
+single body they all feed, and it is the only element on the canvas that stands for the entire
+filer rather than a piece of it. That is what makes the picture whole — the rivers are the parts,
+the lake is the company those parts add up to. Its magnitude is net earnings, what survived the
+whole journey, but the thing it depicts is the company. Copy, labeling and the detail panel read
+that way: a user who understands only one element on screen should understand that the lake is
+the company.
 
 The trunk constriction exists because segment reporting stops at operating income. Tax and
 non-operating items are real, reported, and attributable to no individual segment, so they cannot
@@ -116,8 +124,10 @@ never absorbed silently into the rivers.
 earnings. Area, not diameter — diameter would quadruple apparent magnitude on a doubling and
 overstate every comparison. A scale indicator is displayed so the encoding is verifiable.
 
-The lake encodes **consolidated net earnings**, which is what arrives after the trunk constriction
-of 3.2 — not the sum of segment operating income. A small positive result renders as a small lake
+The lake **is the company as a whole** (§1), and the quantity it carries is **consolidated net
+earnings** — what arrives after the trunk constriction of 3.2, not the sum of segment operating
+income. Consolidated is the operative word: the lake is whole-company by definition, which is why
+3.7 requires its area to be identical whether the hidden segments are drawn or not. A small positive result renders as a small lake
 even with wide rivers arriving; that is correct, and is defended the same way 3.4 defends the loss
 case: the rivers are still visibly consumed, and the smallness is the point.
 
@@ -304,4 +314,5 @@ Open — agents escalate rather than decide:
 | 2026-08-20 | 3.2: constriction set is filer-shaped with a variable count; trunk constriction added. D11 answered. | Angel |
 | 2026-08-20 | 3.4: basin plan area carries magnitude on 3.3's constant; depth demoted to a redundant channel; shoreline clarified as a fixed reference plane. D13 answered. | Angel |
 | 2026-08-20 | §1 and 3.3: trunk constriction carries tax and non-operating items so the lake remains consolidated net earnings. D16 answered. | Angel |
+| 2026-08-23 | §1 and 3.3: the lake **is the company as a whole** — the one element standing for the entire filer, with net earnings as its magnitude rather than its meaning. Clarifies the existing encoding; no geometry change. | Angel |
 | 2026-08-20 | D17 and D18 opened — a third provenance state, and a profit-side reconciliation rule. Both surfaced by EDGAR research; neither blocks the first slice. | Angel |

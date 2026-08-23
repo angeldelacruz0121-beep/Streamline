@@ -5,8 +5,12 @@
 Each reportable business segment is a river whose width is its revenue. Every cost that filer
 actually discloses for that segment cuts a notch into it. The rivers merge into a single trunk,
 one final shared constriction carries tax and non-operating items, and what survives collects as
-the lake — consolidated net earnings. A loss renders as a drained basin, not as an absence of
-revenue.
+the lake.
+
+**The lake is the company as a whole** — the one element on the canvas that stands for the entire
+filer rather than a piece of it. The rivers are the parts of the business; the lake is the company
+those parts add up to. The quantity it carries is consolidated net earnings, but net earnings is
+its magnitude, not its meaning. A loss renders as a drained basin, not as an absence of revenue.
 
 The binding promise, and the gate every release is measured against:
 
