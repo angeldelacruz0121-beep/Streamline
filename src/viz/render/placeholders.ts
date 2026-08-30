@@ -22,6 +22,8 @@ export {
   SPACING,
   TONES,
   TYPE,
+  WORLD,
+  WORLD_TONES,
   css,
   type ConstrictionCue,
   type Tone,

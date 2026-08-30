@@ -12,7 +12,8 @@
  * scene note, so the reader is told rather than left to discover it.
  *
  * The inline styles here are structural only — position, overflow, pointer-events. Colour,
- * type and spacing are Atelier's and are not set here. ATELIER-REPLACE the overlay chrome.
+ * type and spacing are Atelier's and live in `surfaces.css`, keyed off the data attributes
+ * this component and the renderer set. The overlay chrome contract is fulfilled.
  */
 import { useEffect, useRef, type JSX } from 'react';
 import type { CanvasModel } from '../encoding';
@@ -22,6 +23,8 @@ import type { HitTarget } from './hit-test';
 
 export interface StreamlineCanvasProps {
   readonly model: CanvasModel;
+  /** World scenery seed (0038): the filer's CIK. Identity only, never a figure. */
+  readonly worldSeed?: string;
   readonly onHover?: (target: HitTarget | null) => void;
   readonly onSelect?: (target: HitTarget | null) => void;
   /** Test and harness hook. Never set in the application. */
@@ -34,7 +37,7 @@ export function StreamlineCanvas(props: StreamlineCanvasProps): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<Renderer | null>(null);
-  const { model, onHover, onSelect, reducedMotion, onReady } = props;
+  const { model, worldSeed, onHover, onSelect, reducedMotion, onReady } = props;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -48,6 +51,7 @@ export function StreamlineCanvas(props: StreamlineCanvasProps): JSX.Element {
     const renderer = new Renderer({
       canvas,
       model,
+      ...(worldSeed === undefined ? {} : { worldSeed }),
       viewport,
       overlay: overlayRef.current,
       ...(reducedMotion === undefined ? {} : { reducedMotion }),
@@ -124,12 +128,26 @@ export function StreamlineCanvas(props: StreamlineCanvasProps): JSX.Element {
       }}
     >
       <canvas ref={canvasRef} data-streamline-surface="" style={{ display: 'block' }} />
+      {/*
+        The hover box. React owns its SHAPE — these rows are declared once and never added,
+        removed or reordered — and the renderer owns its CONTENT, written as `textContent`
+        inside the pointer dispatch. That split is what keeps Invariant 4.1 satisfiable: a
+        `setState` here would put hover feedback behind a render, which 4.1 fails a build for.
+        An empty row collapses in CSS, so a target with one detail line does not leave a gap.
+      */}
       <div
         ref={overlayRef}
         data-streamline-overlay=""
         data-visible="false"
         style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}
-      />
+      >
+        <div data-overlay-box="">
+          <div data-overlay-row="label" />
+          <div data-overlay-row="value" />
+          <div data-overlay-row="detail" />
+          <div data-overlay-row="detail" />
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 /**
  * Drawing one river: water body, banks, constriction cues, the mandatory dollar
- * annotation on every constriction, the segment label and the disclosure note.
+ * annotation on every constriction, and the segment's name and revenue.
  *
  * Nothing in here computes a quantity. Every number it draws with came out of
  * `layoutScene`, which in turn copied it from Cartographer. The draw pass is deliberately
@@ -12,14 +12,14 @@
  * KIND from a segment cost, by a cue that is not colour alone — is satisfied by a lookup
  * rather than by a special case buried in a branch. ATELIER-REPLACE the cue's appearance.
  */
-import { CONSTRICTION_CUES, TONES, TYPE } from './placeholders';
+import { CONSTRICTION_CUES, TONES, TYPE, WORLD, WORLD_TONES } from './placeholders';
 import {
-  fillWith,
   leader,
   line,
   strokeWith,
   text,
   traceBanks,
+  waterFill,
   type Ctx2D,
 } from './draw-primitives';
 import type { PlacedConstriction, RiverLane } from './scene';
@@ -67,7 +67,7 @@ export function drawConstrictionCue(ctx: Ctx2D, c: PlacedConstriction): void {
   }
 }
 
-/** The mandatory figure (0002 C2) plus the filer's own label for the category. */
+/** The mandatory figure (0002 C2), plus the category name where one is still required. */
 export function drawConstrictionAnnotation(ctx: Ctx2D, c: PlacedConstriction): void {
   const a = c.annotation;
   leader(ctx, a.leaderFrom, a.leaderTo, TONES.rule);
@@ -78,6 +78,13 @@ export function drawConstrictionAnnotation(ctx: Ctx2D, c: PlacedConstriction): v
     align: 'center',
     baseline: above ? 'bottom' : 'top',
   });
+  // The FIGURE is mandatory on every constriction (0002 C2). The filer's category name is
+  // not: it reads on hover instead, which is what takes two rows of type off each notch.
+  // The trunk keeps its name burned on, because 0002 C4 requires that constriction to be
+  // legible as company-wide rather than as one more operating cost. The branch keys off
+  // `distinctTreatmentRequired` — the geometry's own statement of that distinction, and
+  // never off a loop index, which would make appearance a function of ordering.
+  if (!c.distinctTreatmentRequired) return;
   text(
     ctx,
     c.label,
@@ -87,14 +94,36 @@ export function drawConstrictionAnnotation(ctx: Ctx2D, c: PlacedConstriction): v
 }
 
 export function drawRiverBody(ctx: Ctx2D, lane: RiverLane, quality: DrawQuality): void {
+  // The lane's cross-axis extent, from its own banks. Feeds the shared water
+  // gradient (0037): sheen at the banks, TONES.water in the body — one treatment
+  // for every flow, stop list constant, so nothing per-segment can ride in.
+  let crossTop = Infinity;
+  let crossBottom = -Infinity;
+  for (const pt of lane.banks.top) if (pt.y < crossTop) crossTop = pt.y;
+  for (const pt of lane.banks.bottom) if (pt.y > crossBottom) crossBottom = pt.y;
   traceBanks(ctx, lane.banks);
-  fillWith(ctx, TONES.water);
+  waterFill(ctx, crossTop, crossBottom);
   if (quality.effectsQuality > 0) {
+    // Rim glow then edge — both RE-TRACES of the banks already filled above (0038).
+    traceBanks(ctx, lane.banks);
+    strokeWith(ctx, WORLD_TONES.waterGlowOuter, WORLD.waterGlowWidthPx);
     traceBanks(ctx, lane.banks);
     strokeWith(ctx, TONES.waterEdge, 1);
   }
 }
 
+/**
+ * Two rows at the head: what the segment is called, and what it earned.
+ *
+ * It used to be four. The disclosure sentence and the operating-income figure at the mouth
+ * both left this pass — the sentence to the DOM margin, where Invariant 3.2's labelling duty
+ * is discharged in text that can be selected and read aloud, and the figure to hover, where
+ * it answers a question rather than competing for the same band of pixels as the row above.
+ * The comment that used to sit on the disclosure row admitted it "overlaps the river head at
+ * every realistic width"; the honest fix was to stop drawing it here, not to tint it.
+ *
+ * What stays is what a five-second read needs (Invariant 1, the beginner) and nothing more.
+ */
 export function drawRiverLabels(ctx: Ctx2D, lane: RiverLane): void {
   const insideHead = lane.headWidthPx >= 34;
   const labelY = insideHead ? lane.headCentreY - 6 : lane.headCentreY - lane.headWidthPx / 2 - 20;
@@ -110,22 +139,6 @@ export function drawRiverLabels(ctx: Ctx2D, lane: RiverLane): void {
     `${lane.headText} revenue`,
     { x: at.x, y: at.y + 14 },
     { font: TYPE.figure, tone: TONES.text, align: 'left', baseline: 'middle' },
-  );
-  text(
-    ctx,
-    lane.disclosureNote,
-    { x: at.x, y: at.y + 28 },
-    // Full ink, not textDim: this row overlaps the river head at every realistic width,
-    // and textDim passes AA on the bed only (Art Director's usage note, 2026-08-21).
-    { font: TYPE.note, tone: TONES.text, align: 'left', baseline: 'middle' },
-  );
-
-  // Segment operating income, at the mouth. The figure the river's mouth width states.
-  text(
-    ctx,
-    lane.mouthText,
-    { x: lane.mouthX - 6, y: lane.headCentreY },
-    { font: TYPE.figure, tone: TONES.text, align: 'right', baseline: 'middle' },
   );
 }
 

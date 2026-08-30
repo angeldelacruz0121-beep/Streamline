@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { StreamlineCanvas } from './canvas';
+import { layoutScene } from './layout';
 import { composeOrThrow, microsoftFy2026 } from './reference-load';
 import { stubCanvas } from './testing/recording-context';
 
@@ -14,7 +15,7 @@ describe('StreamlineCanvas', () => {
     expect(container.querySelector('[data-streamline-overlay]')).not.toBeNull();
     // Reduced motion draws exactly once, synchronously, with no clock. The picture is
     // complete on mount rather than on the first animation frame.
-    expect(ctx.texts().join(' ')).toContain('$133,749M');
+    expect(ctx.texts().join(' ')).toContain('$133.749B');
   });
 
   it('scrolls rather than scaling when the content overflows — Invariant 3.1', () => {
@@ -40,6 +41,56 @@ describe('StreamlineCanvas', () => {
       new MouseEvent('pointermove', { bubbles: true, clientX: scene.x, clientY: scene.y }),
     );
     // Whatever was or was not hit, the overlay's state was decided inside the dispatch.
+    expect(overlay.dataset['visible']).toMatch(/true|false/);
+  });
+
+  it('commits every hover row and both flip axes inside the dispatch', () => {
+    // Invariant 4.1's hard fail is "any interaction gated behind the render loop". The rows
+    // are React's; their CONTENT is written by the renderer as `textContent`, synchronously,
+    // before the event handler returns. Reading them back here is the same discipline the
+    // perf harness applies with `dataset.visible`.
+    stubCanvas();
+    const { container } = render(<StreamlineCanvas model={model} reducedMotion />);
+    const host = container.querySelector('[data-streamline-canvas]') as HTMLElement;
+    const overlay = container.querySelector('[data-streamline-overlay]') as HTMLElement;
+    // The component falls back to 1440×900 when the container reports no size, which is
+    // what jsdom does, so this is the same scene the renderer laid out.
+    const scene = layoutScene(model, { widthPx: 1440, heightPx: 900 });
+    const lane = scene.rivers[0];
+
+    host.dispatchEvent(
+      new MouseEvent('pointermove', {
+        bubbles: true,
+        clientX: (lane?.headX ?? 0) + 20,
+        clientY: lane?.headCentreY ?? 0,
+      }),
+    );
+
+    expect(overlay.dataset['visible']).toBe('true');
+    expect(overlay.dataset['kind']).toBe('river');
+    expect(overlay.querySelector('[data-overlay-row="label"]')?.textContent).toBe(lane?.label);
+
+    expect(overlay.querySelector('[data-overlay-row="label"]')).not.toBeNull();
+    expect(overlay.querySelector('[data-overlay-row="value"]')).not.toBeNull();
+    expect(overlay.querySelectorAll('[data-overlay-row="detail"]').length).toBe(2);
+    // Opens toward the content centre from a point on the left, and never off the far edge.
+    expect(overlay.dataset['flip']).toBe('right');
+    expect(overlay.dataset['vflip']).toMatch(/up|down/);
+  });
+
+  it('falls back to one line when the overlay has no rows', () => {
+    // The perf harness mounts a bare overlay div. If the renderer assumed rows existed, the
+    // Invariant 4.1 latency gate would break rather than the feature, so the fallback is
+    // load-bearing and is asserted here rather than left to the Playwright run to discover.
+    stubCanvas();
+    const { container } = render(<StreamlineCanvas model={model} reducedMotion />);
+    const overlay = container.querySelector('[data-streamline-overlay]') as HTMLElement;
+    const box = overlay.querySelector('[data-overlay-box]');
+    expect(box).not.toBeNull();
+    box?.remove();
+
+    const host = container.querySelector('[data-streamline-canvas]') as HTMLElement;
+    host.dispatchEvent(new MouseEvent('pointermove', { bubbles: true, clientX: 60, clientY: 0 }));
     expect(overlay.dataset['visible']).toMatch(/true|false/);
   });
 
@@ -83,7 +134,7 @@ describe('StreamlineCanvas', () => {
       '$14,386M',
       '$155,237M',
       '$21,488M',
-      '$133,749M',
+      '$133.749B',
     ]);
     for (const figure of figures) expect(allowed.has(figure), figure).toBe(true);
     expect(screen.queryByText(/lorem|example|demo/i)).toBeNull();

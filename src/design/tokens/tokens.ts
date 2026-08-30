@@ -40,16 +40,47 @@ export const ink = {
 } as const;
 
 /**
- * The measured water ramp. Provisional in value, protected in method: tuning
- * stays inside the photographic envelope (L P05 12-31 / P50 43-89 / P95
- * 172-221, saturation 2-10%) and happens with Angel on sight.
+ * The water ramp: measured LUMINANCE, ruled COLOR. Decision 0037 (2026-08-29):
+ * Angel amended 0022's saturation ceiling, so the ramp is genuinely blue while
+ * each step keeps its photographic luminance band (L P05 12-31 / P50 43-89 /
+ * P95 172-221) — the dark-body, bright-specular structure that makes water
+ * read as water. One shared hue for every flow; per-segment variation stays
+ * forbidden and D15 stays open. Tuning happens with Angel on sight.
  */
 export const water = {
-  deep: rgb(28, 29, 31),
-  mid: rgb(64, 66, 71),
-  shallow: rgb(101, 104, 112),
-  specular: rgb(196, 201, 212),
+  deep: rgb(16, 30, 44),
+  mid: rgb(38, 68, 90),
+  shallow: rgb(70, 112, 134),
+  specular: rgb(184, 206, 224),
 } as const;
+
+/**
+ * The world families (decision 0038, 2026-08-30): the film's dressing brought
+ * to the live canvas as scenery — sky fenced in its own band, dusk terrain
+ * under everything, hill silhouettes on the horizon, faint mist. NOTHING here
+ * may look like data or vary with a financial quantity; hills are seeded by
+ * CIK text only. Terrain luminance is capped so every existing label keeps AA
+ * in its current ink — Angel's usability-first clause, enforced by the guard
+ * tests beside canvas-tokens.ts.
+ */
+export const sky = {
+  zenith: rgb(224, 178, 186),
+  mid: rgb(238, 190, 168),
+  glow: rgb(248, 214, 170),
+} as const;
+
+export const terrain = {
+  base: rgb(30, 42, 32),
+  shade: rgb(24, 33, 26),
+  lift: rgb(34, 46, 36),
+} as const;
+
+export const hill = {
+  far: rgb(122, 104, 96),
+  near: rgb(64, 74, 52),
+} as const;
+
+export const mist = rgb(214, 220, 224);
 
 /**
  * UI STATE ONLY — focus rings, links, interactive state. Forbidden on the

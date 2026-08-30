@@ -7,7 +7,19 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { ink, motion, shape, space, surface, typeScale, water } from './tokens';
+import {
+  hill,
+  ink,
+  mist,
+  motion,
+  shape,
+  sky,
+  space,
+  surface,
+  terrain,
+  typeScale,
+  water,
+} from './tokens';
 
 const cssText = readFileSync(fileURLToPath(new URL('./tokens.css', import.meta.url)), 'utf8');
 
@@ -39,10 +51,12 @@ const BINDING_COLOURS: readonly (readonly [string, number, number, number, numbe
   ['--ink-secondary', 255, 255, 255, 0.72],
   ['--ink-tertiary', 255, 255, 255, 0.5],
   ['--ink-faint', 255, 255, 255, 0.2],
-  ['--water-deep', 28, 29, 31],
-  ['--water-mid', 64, 66, 71],
-  ['--water-shallow', 101, 104, 112],
-  ['--water-specular', 196, 201, 212],
+  // Water re-ruled 2026-08-29 (0037): luminance bands held, chroma added by Angel's
+  // amendment. Superseded values live in DESIGN.md's OVERRIDES row and in 0037.
+  ['--water-deep', 16, 30, 44],
+  ['--water-mid', 38, 68, 90],
+  ['--water-shallow', 70, 112, 134],
+  ['--water-specular', 184, 206, 224],
   ['--accent', 46, 167, 255],
   ['--accent-quiet', 46, 167, 255, 0.16],
   ['--state-refused', 255, 255, 255, 0.5],
@@ -126,10 +140,14 @@ describe('tokens.ts mirrors tokens.css', () => {
     expect([surface.sunken.r, surface.sunken.g, surface.sunken.b]).toEqual([20, 20, 20]);
     expect(ink.secondary.alpha).toBeCloseTo(0.72, 5);
     expect(ink.tertiary.alpha).toBeCloseTo(0.5, 5);
-    expect([water.deep.r, water.deep.g, water.deep.b]).toEqual([28, 29, 31]);
-    expect([water.mid.r, water.mid.g, water.mid.b]).toEqual([64, 66, 71]);
-    expect([water.shallow.r, water.shallow.g, water.shallow.b]).toEqual([101, 104, 112]);
-    expect([water.specular.r, water.specular.g, water.specular.b]).toEqual([196, 201, 212]);
+    expect([water.deep.r, water.deep.g, water.deep.b]).toEqual([16, 30, 44]);
+    expect([water.mid.r, water.mid.g, water.mid.b]).toEqual([38, 68, 90]);
+    expect([water.shallow.r, water.shallow.g, water.shallow.b]).toEqual([70, 112, 134]);
+    expect([water.specular.r, water.specular.g, water.specular.b]).toEqual([184, 206, 224]);
+    expect([terrain.base.r, terrain.base.g, terrain.base.b]).toEqual([30, 42, 32]);
+    expect([sky.glow.r, sky.glow.g, sky.glow.b]).toEqual([248, 214, 170]);
+    expect([hill.near.r, hill.near.g, hill.near.b]).toEqual([64, 74, 52]);
+    expect([mist.r, mist.g, mist.b]).toEqual([214, 220, 224]);
   });
 
   it('scale and motion agree', () => {

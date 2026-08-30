@@ -24,7 +24,6 @@ function render(): RecordingContext {
     particleY: new Float32Array(0),
     particleCount: 0,
     highlightId: null,
-    noteTextOverride: null,
   });
   return ctx;
 }
@@ -36,7 +35,7 @@ function render(): RecordingContext {
  * quietly hardening into an encoding while Angel is deciding.
  */
 describe('D15 — no colour reaches the canvas', () => {
-  it('emits nothing above 10% saturation, and one shared fill across the rivers', () => {
+  it('emits one shared hue family under the 0037 ceiling, and one shared fill across the rivers', () => {
     for (const [name, tone] of Object.entries(TONES)) {
       // Adopted `Tone` shape (canvas-tokens): rgb channels plus alpha, replacing the
       // placeholder's single achromatic level under the same widened D15 contract.
@@ -48,20 +47,39 @@ describe('D15 — no colour reaches the canvas', () => {
       expect(tone.alpha, name).toBeGreaterThanOrEqual(0);
       expect(tone.alpha, name).toBeLessThanOrEqual(1);
     }
-    // Angel's ruling 2026-08-21, superseding the pure-gray (R = G = B) form: DESIGN.md
-    // binds a water ramp carrying the ground's slight blue cast — e.g. rgb(28,29,31),
-    // ~9.7% saturation — so the pixel guard is now ONE shared fill, saturation ≤ 10%,
-    // zero per-segment variation. The bound applies to EVERY emitted colour, not only
-    // water; a legitimate token should never trip it, and one that does is a finding.
-    // Saturation is (max − min) / max per colour, 0 for black.
+    // Angel's rulings 2026-08-29 (0037) and 2026-08-30 (0038): the water is genuinely
+    // blue and the world is dressed, so the pixel guard is a FAMILY CLASSIFIER rather
+    // than a single window. What it still forbids is exactly what D15 needs held:
+    // every chromatic colour on the canvas must belong to ONE of the ruled families —
+    // water blue, terrain dusk-green, sunset sky, earthy hills — each inside its own
+    // ruled bounds, so no NEW hue can appear to differentiate anything while Angel is
+    // deciding D15. Per-segment variation is still killed by the one-shared-fill
+    // assertions below, which are family-blind and unchanged.
+    const wrappedDistance = (h: number, from: number): number =>
+      Math.abs(((h - from + 540) % 360) - 180);
     for (const colour of render().colours()) {
       const match = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(colour);
       if (match === null) continue;
-      const channels = [Number(match[1]), Number(match[2]), Number(match[3])];
-      const max = Math.max(...channels);
-      const min = Math.min(...channels);
+      const [r, g, b] = [Number(match[1]), Number(match[2]), Number(match[3])];
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
       const saturation = max === 0 ? 0 : (max - min) / max;
-      expect(saturation, colour).toBeLessThanOrEqual(0.1);
+      expect(saturation, colour).toBeLessThanOrEqual(0.65);
+      if (max === min || saturation <= 0.08) continue; // achromatic and near-achromatic
+      const d = max - min;
+      let h: number;
+      if (max === r) h = ((g - b) / d) % 6;
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      const hue = (((h * 60) % 360) + 360) % 360;
+      const inWater = hue >= 195 && hue <= 215;
+      const inTerrain = hue >= 90 && hue <= 150 && saturation <= 0.35 && max <= 46;
+      const inHills = hue >= 15 && hue <= 150 && saturation <= 0.3 && max >= 40 && max <= 130;
+      const inSky = wrappedDistance(hue, 12) <= 33 && saturation <= 0.45 && max >= 150;
+      expect(
+        inWater || inTerrain || inHills || inSky,
+        `${colour} (hue ${hue.toFixed(1)}) belongs to no ruled family`,
+      ).toBe(true);
     }
 
     // Zero per-segment variation, proven on the pixels rather than the source: every
@@ -123,7 +141,9 @@ describe('D9 — no growth-to-speed mapping exists', () => {
     const note = scene.notes.find((n) => n.code === 'baseline-flow');
     expect(note?.text).toContain('baseline flow speed');
     expect(note?.text).toContain('varies with nothing');
-    expect(render().texts().join(' ')).toContain('baseline flow speed');
+    // The label is still required and still produced; it is read in the DOM margin rather
+    // than painted over the picture. `canvas-margin.test.tsx` asserts it reaches the reader.
+    expect(render().texts().join(' ')).not.toContain('baseline flow speed');
   });
 });
 

@@ -15,14 +15,20 @@
  * so. See `draw-junction-seam.ts`.
  */
 import { drawConstrictionAnnotation, drawConstrictionCue, type DrawQuality } from './draw-river';
-import { fillWith, line, strokeWith, text, traceBanks, type Ctx2D } from './draw-primitives';
-import { TONES, TYPE } from './placeholders';
+import { line, strokeWith, text, traceBanks, waterFill, type Ctx2D } from './draw-primitives';
+import { TONES, TYPE, WORLD, WORLD_TONES } from './placeholders';
 import type { TrunkSection } from './scene';
 
 export function drawTrunkBody(ctx: Ctx2D, trunk: TrunkSection, quality: DrawQuality): void {
+  // Same shared depth treatment as every river (0037): the trunk is a flow on
+  // identical terms, its cross extent taken at its widest, the arriving width.
+  const half = trunk.arrivingWidthPx / 2;
   traceBanks(ctx, trunk.banks);
-  fillWith(ctx, TONES.water);
+  waterFill(ctx, trunk.centreY - half, trunk.centreY + half);
   if (quality.effectsQuality > 0) {
+    // Rim glow then edge — both re-traces of the banks already filled above (0038).
+    traceBanks(ctx, trunk.banks);
+    strokeWith(ctx, WORLD_TONES.waterGlowOuter, WORLD.waterGlowWidthPx);
     traceBanks(ctx, trunk.banks);
     strokeWith(ctx, TONES.waterEdge, 1);
   }
@@ -66,14 +72,10 @@ export function drawTrunkLabels(ctx: Ctx2D, trunk: TrunkSection): void {
     { x: trunk.endX - 6, y: trunk.centreY },
     { font: TYPE.figure, tone: TONES.text, align: 'right', baseline: 'middle' },
   );
-  if (!trunk.itemizationProvided) {
-    text(
-      ctx,
-      'Residual itemisation not supplied',
-      { x: trunk.constriction.enterX, y: trunk.centreY + trunk.arrivingWidthPx / 2 + 16 },
-      { font: TYPE.note, tone: TONES.textDim, align: 'center', baseline: 'top' },
-    );
-  }
+  // The missing itemisation used to be stated here AND as scene note `itemization-missing`
+  // (layout.ts). Two statements of one fact, one of them landing under the trunk bank where
+  // it had to compete with the constriction annotation. The note survives and now reads in
+  // the margin; this copy was pure duplication and is gone.
 }
 
 export function drawTrunk(ctx: Ctx2D, trunk: TrunkSection, quality: DrawQuality): void {

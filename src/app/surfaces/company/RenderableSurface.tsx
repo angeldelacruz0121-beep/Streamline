@@ -22,6 +22,7 @@ import type { Validated } from '../../../types/brand';
 import { composeFromCompany } from '../../../state/canvas-adapter';
 import { EncodingBlockedSurface } from '../app-surfaces';
 import { DataNotes, EntityHeading, FilingLine } from '../parts';
+import { CanvasMargin } from './CanvasMargin';
 
 export interface RenderableSurfaceProps {
   readonly view: Validated<RenderableCompany>;
@@ -50,7 +51,13 @@ export function RenderableSurface({ view, missing }: RenderableSurfaceProps): JS
       />
       <DataNotes notes={view.notes} />
       {outcome.kind === 'model' ? (
-        <StreamlineCanvas model={outcome.model} />
+        // The canvas and its margin are one region: the picture states the figures, the plate
+        // beside it carries the prose that used to be printed over the picture. Wrapping them
+        // together keeps that relationship structural rather than a coincidence of ordering.
+        <div data-part="canvas-region">
+          <StreamlineCanvas model={outcome.model} worldSeed={view.entity.cik} />
+          <CanvasMargin model={outcome.model} />
+        </div>
       ) : (
         <EncodingBlockedSurface outcome={outcome} />
       )}

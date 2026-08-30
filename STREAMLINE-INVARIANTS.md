@@ -262,16 +262,20 @@ the interface; chrome does not. Tabular numerals on every figure. Motion is phys
 purposeful, never ornamental easing. Density over whitespace where an analyst is the reader.
 
 **Naturalism.** Rivers should read as water and the lake should read as a lake. The visualization
-needs life and physical presence, not saturation. Naturalism is pursued through motion behavior,
-silhouette, surface, and light — never through refraction, caustics, or physically-based water
-shading, which will not hold the frame budget on reference hardware even at the 30fps floor.
-Performance Engineer costs any proposed approach before Art Director commits to it.
+needs life and physical presence. Naturalism is pursued through motion behavior, silhouette,
+surface, light — and, since the 2026-08-29 amendment, one genuinely water-colored shared hue
+(decision 0037): saturation may serve the water itself, never a distinction between elements.
+Refraction, caustics, and physically-based water shading remain excluded — they will not hold the
+frame budget on reference hardware even at the 30fps floor. Performance Engineer costs any
+proposed approach before Art Director commits to it.
 
 **Color is encoding, not decoration.** The palette stays restrained. Where color distinguishes
 segments it is a stable hue per segment, consistent across periods and across filers, documented
 in the scales, and verified under deuteranopia and protanopia simulation. Vibrance for its own
 sake is rejected — it would breach Invariant 3.6 by making viewers read meaning into an arbitrary
-choice.
+choice. The 2026-08-29 amendment does not touch this rule: the water's single shared hue is
+identical for every flow, so no difference between elements is carried by color, and D15 stays
+open.
 
 Explicitly rejected: gradients without function, glassmorphism as decoration, generic
 AI-interface genericism, anything that reads as a template, and decorative color.
@@ -311,6 +315,7 @@ Open — agents escalate rather than decide:
 | — | Initial. D1–D8 answered. | Angel |
 | 2026-08-20 | 4.1 rewritten: framerate is a floor, not a target; quality outranks rate above it; interaction latency split out as its own standard. D4 redefined. | Angel |
 | 2026-08-20 | §5 gains Naturalism and Colour-is-encoding. D14 answered; D15 opened. | Angel |
+| 2026-08-29 | §5 Naturalism amended: one genuinely saturated shared water hue permitted (0037). 0022's ceiling superseded; D15 still open. | Angel |
 | 2026-08-20 | 3.2: constriction set is filer-shaped with a variable count; trunk constriction added. D11 answered. | Angel |
 | 2026-08-20 | 3.4: basin plan area carries magnitude on 3.3's constant; depth demoted to a redundant channel; shoreline clarified as a fixed reference plane. D13 answered. | Angel |
 | 2026-08-20 | §1 and 3.3: trunk constriction carries tax and non-operating items so the lake remains consolidated net earnings. D16 answered. | Angel |

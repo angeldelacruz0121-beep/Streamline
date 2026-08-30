@@ -29,7 +29,7 @@ import type { Ctx2D } from './draw-primitives';
 import { buildHitIndex, hitTest, type HitIndex, type HitTarget } from './hit-test';
 import { layoutScene } from './layout';
 import { FrameClock, browserHost, type FrameClockHost, type LockedHz } from './rate-lock';
-import { REDUCED_MOTION_NOTES, prefersReducedMotion } from './reduced-motion';
+import { prefersReducedMotion } from './reduced-motion';
 import type { Scene, Viewport } from './scene';
 
 /**
@@ -73,12 +73,28 @@ export interface RendererOptions {
   readonly reducedMotion?: boolean;
   readonly devicePixelRatio?: number;
   readonly onHover?: (target: HitTarget | null) => void;
+  /** World scenery seed (0038): the filer's CIK string. Identity only, never a figure. */
+  readonly worldSeed?: string;
 }
 
 export class Renderer {
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: Ctx2D;
   private readonly overlay: HTMLElement | null;
+  /**
+   * The overlay's row elements, resolved once and then written by `.textContent` only.
+   *
+   * Null means the overlay has no rows — the perf harness builds a bare div, and so does any
+   * embedder that mounts the renderer without the React component. That case falls back to
+   * the single-line write this overlay has always done, which is why adding rows cannot
+   * regress the Invariant 4.1 latency gate.
+   */
+  private overlayRows: {
+    readonly label: HTMLElement;
+    readonly value: HTMLElement;
+    readonly detail: readonly HTMLElement[];
+  } | null = null;
+  private overlayRowsResolved = false;
   private readonly onHover: ((target: HitTarget | null) => void) | null;
   private readonly clock: FrameClock;
   private readonly controller = new DegradationController();
@@ -100,7 +116,7 @@ export class Renderer {
     particleY: Float32Array;
     particleCount: number;
     highlightId: string | null;
-    noteTextOverride: Readonly<Record<string, string>> | null;
+    worldSeed: string;
   };
 
   private requestedDpr: number;
@@ -138,7 +154,7 @@ export class Renderer {
       particleY: this.outY,
       particleCount: 0,
       highlightId: null,
-      noteTextOverride: this.reducedMotion ? REDUCED_MOTION_NOTES : null,
+      worldSeed: options.worldSeed ?? 'no-company',
     };
 
     this.clock = new FrameClock(options.host ?? browserHost(), (dtSec) => {
@@ -208,7 +224,6 @@ export class Renderer {
   setReducedMotion(reduced: boolean): void {
     if (reduced === this.reducedMotion) return;
     this.reducedMotion = reduced;
-    this.drawOptions.noteTextOverride = reduced ? REDUCED_MOTION_NOTES : null;
     if (reduced) {
       this.clock.stop();
       this.frame(0);
@@ -324,6 +339,22 @@ export class Renderer {
    * hover feedback to the overlay before returning. Latency is measured against the
    * event's own timestamp, not against a frame boundary.
    */
+  private resolveOverlayRows(): void {
+    // Once per renderer, never on the input path after the first move. `querySelector` is a
+    // tree walk, not a layout read, so it forces no reflow even on that first call.
+    this.overlayRowsResolved = true;
+    const overlay = this.overlay;
+    if (overlay === null || typeof overlay.querySelector !== 'function') return;
+    const label = overlay.querySelector('[data-overlay-row="label"]');
+    const value = overlay.querySelector('[data-overlay-row="value"]');
+    if (label === null || value === null) return;
+    this.overlayRows = {
+      label: label as HTMLElement,
+      value: value as HTMLElement,
+      detail: Array.from(overlay.querySelectorAll('[data-overlay-row="detail"]')) as HTMLElement[],
+    };
+  }
+
   handlePointer(clientX: number, clientY: number, eventTimeMs?: number): HitTarget | null {
     if (this.canvasRect === null) this.refreshCanvasRect();
     const origin = this.canvasRect ?? { left: 0, top: 0 };
@@ -333,9 +364,27 @@ export class Renderer {
     if (target?.id !== this.hovered?.id) {
       this.hovered = target;
       if (this.overlay !== null) {
-        this.overlay.textContent = target === null ? '' : `${target.label} — ${target.valueText}`;
+        if (!this.overlayRowsResolved) this.resolveOverlayRows();
+        const rows = this.overlayRows;
+        if (rows === null) {
+          this.overlay.textContent = target === null ? '' : `${target.label} — ${target.valueText}`;
+        } else {
+          rows.label.textContent = target === null ? '' : target.label;
+          rows.value.textContent = target === null ? '' : target.valueText;
+          for (let i = 0; i < rows.detail.length; i += 1) {
+            const row = rows.detail[i] as HTMLElement;
+            row.textContent = target === null ? '' : (target.detail[i] ?? '');
+          }
+        }
         this.overlay.style.transform = `translate(${x}px, ${y}px)`;
         this.overlay.dataset.visible = target === null ? 'false' : 'true';
+        this.overlay.dataset.kind = target === null ? '' : target.kind;
+        // Which way the box opens. Two comparisons against numbers already on the scene —
+        // no element measurement, no `getBoundingClientRect`, nothing that reads layout.
+        // CSS resolves the actual offset against the box's own rendered size, so the browser
+        // does the measuring for free and the box always opens toward the content centre.
+        this.overlay.dataset.flip = x > this.scene.contentWidthPx / 2 ? 'left' : 'right';
+        this.overlay.dataset.vflip = y > this.scene.contentHeightPx / 2 ? 'up' : 'down';
       }
       if (this.onHover !== null) this.onHover(target);
     }

@@ -8,7 +8,7 @@ file is wrong.
 `/next` reads this file instead of re-deriving state from git history, which is the §8 principle
 applied directly: anything that must survive a context clear lives in a file.
 
-Last updated: 2026-08-23 · by: Technical Writer
+Last updated: 2026-08-29 · by: Technical Writer
 
 ---
 
@@ -150,7 +150,16 @@ escalate-only.
 
 **PENDING:** 0032 (Meta loss-making segment geometry) — Angel researching before ruling. Three options on the table with rider conditions. (docs/decisions/0032-meta-loss-making-segment-three-options-pending.md)
 
-**RECORDED, UNBUILT:** 0033 (visual direction: vertical orientation, evocative water not diagram), 0034 (clickable correction detail).
+**RECORDED, UNBUILT:** 0033's ORIENTATION half (vertical, whole picture in one glance) and 0034 (clickable correction detail).
+
+**SHIPPED 2026-08-30 (decision 0038):** the world dressing — sunset sky band, hill
+silhouettes, dusk terrain, mist, water rim glow — around unchanged honest geometry, for
+every covered filer, seeded by CIK only. Angel's governing clause recorded: usability and
+per-search consistency outrank aesthetics; scenery-colour families amended into §5 with
+enforced bounds; terrain continuous under the junction; bank terraces trimmed. OPEN:
+final look approval on the reports/world/ screenshot set; perf gate + post-world baseline
+re-run on a QUIET reference machine (bisect attributed today's marginal failures to
+machine noise — the no-world control failed pacing worse than the world build). 0033's LOOK half shipped 2026-08-29 under decision 0037: Angel amended 0022's saturation ceiling, the water ramp is genuinely blue at the measured luminances, and river/trunk/lake carry one shared bank-sheen depth gradient. Guards updated to enforce the new rule (ceiling 65%, one shared hue family 195-215°, one shared fill, no per-segment variation); D15 remains open.
 
 **STANDING CONSTRAINT** (0030): Technology sector only (SIC 3570–3579, 3674, 7370–7379). NO new companies added to the working set without Angel's explicit authorization. Microsoft is the target; other filers are regression checks only.
 
@@ -161,7 +170,12 @@ escalate-only.
 
 **Current renderable state:** Six filers return renderable DATA from EDGAR pipeline (Microsoft, Apple, NVIDIA, HP, Autodesk, Meta). Meta's data layer is correct; drawing layer refuses to render pending 0032 decision.
 
-**Open hand-offs (three):**
+**Open hand-offs (four):**
+0. **Performance Engineer:** re-record `perf/baseline.json` on an idle machine. The regression
+   gate now fails against the 2026-08-21 baseline (interaction p95 ~13.5ms vs 8.5×1.25 allowed)
+   because two approved features legitimately changed the profile — the hover-box rows
+   (2026-08-26) and the 0037 water gradient (2026-08-29, memoized). Every ABSOLUTE 4.1 gate
+   passes with wide margin; only the stale-baseline comparison trips.
 1. **QA Engineer:** fixtures/README.md wrongly assigns amendment case to Super Micro (no 10-K/A); HP has three real amendments of three different shapes. 15 of 19 captured envelopes no longer match current pipeline output because of other agents' fixes.
 2. **Software Architect and Art Director:** the new `filing` block (0028's metadata) is available and unrendered.
 3. **Financial Data Analyst:** the accession handed to ingestAnnualSegments can now be a 10-K/A (0028 implementation complete).
@@ -185,4 +199,4 @@ When Angel answers an open decision: strike it from §4 and note it in the relev
 **Development server:** Vite runs on port 5180 (not 5173, which is a different project, Gridiron).
 **EDGAR proxy:** Runs on port 8787 — verify dev tests target this port, not another instance.
 
-**Test suite:** Data Engineer suite passes 1032; 83 files; typecheck and prettier clean (2026-08-23).
+**Test suite:** 1075 passing; 86 files; typecheck and prettier clean (2026-08-30).

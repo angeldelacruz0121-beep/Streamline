@@ -96,7 +96,7 @@ describe('the vertical slice', () => {
     // business setting it — so the first paint lands on an animation frame,
     // exactly as it does in a browser.
     await waitFor(() => {
-      expect(ctx.texts().join(' ')).toContain('$133,749M');
+      expect(ctx.texts().join(' ')).toContain('$133.749B');
     });
 
     const drawn = ctx.texts().join(' ');

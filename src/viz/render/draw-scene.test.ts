@@ -22,7 +22,6 @@ function options(overrides: Partial<DrawOptions> = {}): DrawOptions {
     particleY: new Float32Array(0),
     particleCount: 0,
     highlightId: null,
-    noteTextOverride: null,
     ...overrides,
   };
 }
@@ -48,12 +47,16 @@ describe('drawScene', () => {
       'More Personal Computing',
       'All segments combined',
       'Taxes and non-operating items',
-      '$133,749M',
+      '$133.749B',
       'FY2026 net earnings',
-      'stated separately',
     ]) {
       expect(texts, expected).toContain(expected);
     }
+    // The caption explaining the separation left the canvas for the margin plate. The
+    // separation itself did not: the vertical rule is still drawn, and `junction.test.ts`
+    // still checks it. The sentence survives on `scene.separation.note`.
+    expect(texts).not.toContain('stated separately');
+    expect(scene.separation.note).toContain('stated separately');
   });
 
   it('draws the width indicator as a bar and the area indicator as a disc — 0001 C6', () => {
@@ -107,13 +110,19 @@ describe('drawScene', () => {
     expect(none.calls).toHaveLength(0);
   });
 
-  it('substitutes a note’s text without moving it', () => {
-    const plain = new RecordingContext();
-    const overridden = new RecordingContext();
-    drawScene(plain.as(), scene, options());
-    drawScene(overridden.as(), scene, options({ noteTextOverride: { 'baseline-flow': 'X' } }));
-    expect(overridden.texts()).toContain('X');
-    expect([...overridden.coordinates()].sort()).toEqual([...plain.coordinates()].sort());
+  it('draws no scene note at all — the notes stack reads in the DOM margin', () => {
+    // `drawNotes` is gone. The stack it drew held the fiscal period, the baseline-flow note
+    // and every `legibility` finding — multi-sentence paragraphs stacked at a fixed 15px
+    // pitch over the picture. `Scene.notes` still carries all of it, unchanged, and
+    // `CanvasMargin` renders it; the substitution that used to happen at draw time now
+    // happens there. `canvas-margin.test.tsx` is the other half of this assertion.
+    const ctx = new RecordingContext();
+    drawScene(ctx.as(), scene, options());
+    const texts = ctx.texts();
+    for (const note of scene.notes) {
+      expect(texts, note.code).not.toContain(note.text);
+    }
+    expect(scene.notes.length).toBeGreaterThan(0);
   });
 });
 
@@ -154,7 +163,7 @@ describe('drawScene — the drained basin', () => {
     // The hatch is the dry floor; the clip proves it stayed inside the basin.
     expect(ctx.ops('clip').length).toBeGreaterThan(0);
     expect(ctx.texts().join(' ')).toContain('FY2026 net loss');
-    expect(ctx.texts().join(' ')).toContain('−$133,749M');
+    expect(ctx.texts().join(' ')).toContain('−$133.749B');
   });
 
   it('shows depth as a gauge, never as volume — 3.4, kill-list K13', () => {

@@ -94,7 +94,10 @@ describe('layout — widths are copied, never computed', () => {
     const all = [...scene.rivers.flatMap((l) => l.constrictions), scene.trunk.constriction];
     expect(all).toHaveLength(7);
     for (const c of all) {
-      expect(c.annotation.text).toMatch(/^\$[\d,]+M$/);
+      // Scaled and exact: `$25.017B`, `$31.1B`. Was `/^\$[\d,]+M$/` when every figure
+      // was drawn in millions. What C2 requires is that the figure is PRESENT, not which
+      // unit carries it — and `format.test.ts` proves the scaling loses nothing.
+      expect(c.annotation.text).toMatch(/^−?\$[\d,]+(\.\d{1,3})?[TBM]?$/);
       expect(c.annotation.valueUsd).toBeGreaterThan(0);
       expect(c.removedWidthPx + (c.overdraw?.unrepresentedWidthPx ?? 0)).toBeCloseTo(
         widthPx(c.annotation.valueUsd),

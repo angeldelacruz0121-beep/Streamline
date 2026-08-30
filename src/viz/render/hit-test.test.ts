@@ -15,7 +15,34 @@ describe('hit testing — Invariant 1, every river and constriction is clickable
     expect(hit?.id).toBe(lane?.id);
     expect(hit?.kind).toBe('river');
     expect(hit?.valueUsd).toBe(usdFromMillions(139_996));
-    expect(hit?.valueText).toBe('$139,996M');
+    // The template the river head has always printed, reused verbatim for the hover box.
+    expect(hit?.valueText).toBe('$139,996M revenue');
+  });
+
+  it('carries the rows the canvas stopped drawing, and nothing it never had', () => {
+    // The other half of the text triage. What left the picture is reachable here, so no
+    // information was lost — and what was never on the canvas is not invented here either.
+    const lane = scene.rivers[0];
+    const hit = hitTest(index, (lane?.headX ?? 0) + 20, lane?.headCentreY ?? 0);
+    expect(hit?.detail?.[0]).toBe('$83,879M segment operating income');
+    expect(hit?.detail?.[1]).toContain('2 expense categories');
+
+    // NOT the D17 analyst panel: no accession, form, tag or provenance reaches a hit.
+    const serialised = JSON.stringify(hit);
+    for (const forbidden of ['accession', 'us-gaap', 'provenance', 'sourceRef', '10-K']) {
+      expect(serialised, forbidden).not.toContain(forbidden);
+    }
+  });
+
+  it('gives a constriction its figure, and the trunk its shortfall note when there is one', () => {
+    const c = scene.rivers[0]?.constrictions[0];
+    const hit = hitTest(index, ((c?.enterX ?? 0) + (c?.exitX ?? 0)) / 2, c?.centreY ?? 0);
+    expect(hit?.kind).toBe('constriction');
+    // The hover box quotes the filing's unit; the canvas quotes the scaled one. Both exact.
+    expect(hit?.valueText).toBe('$25,017M');
+    expect(c?.annotation.text).toBe('$25.017B');
+    // Microsoft overdraws nothing, so there is no shortfall to state.
+    expect(hit?.detail).toEqual([]);
   });
 
   it('finds every constriction on every river', () => {

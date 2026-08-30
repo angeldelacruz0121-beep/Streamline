@@ -82,13 +82,168 @@ main {
   margin-inline: var(--space-5);
 }
 
-/* The canvas region — the only div child is StreamlineCanvas's wrapper. */
-[data-surface='renderable'] > div {
+/*
+ * The canvas region: the picture, and the margin plate that carries its prose.
+ *
+ * This rule used to target `> div` on the assumption that StreamlineCanvas's wrapper was the
+ * only div child. It is not any more, so the region is named explicitly and the canvas is
+ * addressed by its own attribute — a structural change to the surface can no longer silently
+ * re-point the layout.
+ */
+[data-part='canvas-region'] {
   flex: 1 1 auto;
   min-height: var(--canvas-min);
   margin-top: var(--space-3);
   background: var(--surface-sunken);
   border-top: var(--border-hair) solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+[data-part='canvas-region'] > [data-streamline-canvas] {
+  flex: 1 1 auto;
+  min-height: var(--canvas-min);
+}
+
+/* ── The canvas margin — prose that used to be painted on the picture ─────
+ *
+ * BELOW the picture, not beside it, and the reason is measured rather than aesthetic.
+ * Microsoft lays out at 1452px of content. Beside the picture this plate took 320px of a
+ * 1280px window and left the canvas 960px, which put the lake — the thing the whole
+ * metaphor is built to arrive at — off-screen until the reader panned. Invariant 3.1
+ * forbids scaling to fit, so the only currency available is layout, and the picture has
+ * the stronger claim on width. Prose reads perfectly well in columns under it.
+ */
+
+[data-part='canvas-margin'] {
+  flex: 0 0 auto;
+  padding: var(--space-4) var(--space-5) var(--space-5);
+}
+
+[data-part='canvas-margin'] [data-primitive='plate'] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--measure-margin), 1fr));
+  gap: var(--space-5);
+  align-items: start;
+  padding: var(--space-4);
+}
+
+[data-part='margin-section'] {
+  display: grid;
+  row-gap: var(--space-2);
+}
+
+/* Copy slot — headings are Angel's; each collapses until written. */
+[data-part='margin-heading']:empty {
+  display: none;
+}
+
+[data-part='margin-list'] {
+  display: grid;
+  row-gap: var(--space-2);
+}
+
+/* A disclosure row is its segment's name over the sentence about it. */
+[data-section='disclosure'] li {
+  display: grid;
+  row-gap: var(--space-1);
+}
+
+[data-part='canvas-margin'] li,
+[data-part='canvas-margin'] p {
+  font-size: var(--text-micro);
+  line-height: var(--lh-micro);
+  color: var(--ink-secondary);
+  overflow-wrap: anywhere;
+}
+
+/*
+ * The period is the one note the picture also states, and it leads the stack. Full ink so it
+ * reads as a heading for what follows rather than as one more note.
+ */
+[data-part='canvas-margin'] li[data-code='period'] {
+  color: var(--ink-primary);
+}
+
+/* ── The hover box ──────────────────────────────────────────────────────────
+ *
+ * Detail on demand: the analyst's thirty seconds, without spending the beginner's five.
+ * Content is written by the renderer as `textContent` inside the pointer dispatch — this
+ * file only says what it looks like and which way it opens.
+ *
+ * Depth is a lightness step plus ONE hairline ring. Not a shadow stack and not glass:
+ * DESIGN.md rejects both by name. No hue enters — colour is not an encoding channel until
+ * D15 is answered, and the interactive accent is forbidden anywhere near the picture.
+ */
+
+[data-streamline-overlay] {
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+[data-streamline-overlay][data-visible='true'] {
+  opacity: 1;
+}
+
+[data-overlay-box] {
+  display: grid;
+  row-gap: var(--space-1);
+  max-inline-size: var(--measure-tip);
+  width: max-content;
+  padding: var(--space-3);
+  background: var(--surface-raised);
+  border-radius: var(--radius-plate);
+  box-shadow: var(--ring-edge);
+  /*
+   * The box measures itself. `--tip-dx/dy` are percentages of its OWN rendered size, so the
+   * flip below needs no `measureText` and no `getBoundingClientRect` on the input path — the
+   * renderer sets two data attributes from numbers it already has, and layout does the rest.
+   */
+  transform: translate(var(--tip-dx, var(--space-3)), var(--tip-dy, var(--space-3)));
+}
+
+/* Always opens toward the middle of the content, so it never runs off the far edge, and
+   always clears the pointer by one step, so it never covers what it describes. */
+[data-streamline-overlay][data-flip='right'] [data-overlay-box] {
+  --tip-dx: var(--space-3);
+}
+
+[data-streamline-overlay][data-flip='left'] [data-overlay-box] {
+  --tip-dx: calc(-100% - var(--space-3));
+}
+
+[data-streamline-overlay][data-vflip='down'] [data-overlay-box] {
+  --tip-dy: var(--space-3);
+}
+
+[data-streamline-overlay][data-vflip='up'] [data-overlay-box] {
+  --tip-dy: calc(-100% - var(--space-3));
+}
+
+[data-overlay-row='label'] {
+  font-size: var(--text-label);
+  line-height: var(--lh-label);
+  letter-spacing: var(--track-label);
+  color: var(--ink-primary);
+}
+
+[data-overlay-row='value'] {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-label);
+  line-height: var(--lh-label);
+  color: var(--ink-primary);
+}
+
+[data-overlay-row='detail'] {
+  font-size: var(--text-micro);
+  line-height: var(--lh-micro);
+  color: var(--ink-secondary);
+}
+
+/* A target with fewer detail lines than rows leaves no gap. */
+[data-overlay-row]:empty {
+  display: none;
 }
 
 /* Unfilled copy slot (reconciliation wording is Angel's); collapses until written. */

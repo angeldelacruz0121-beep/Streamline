@@ -38,6 +38,27 @@ export class RecordingContext {
   textBaseline: CanvasTextBaseline = 'alphabetic';
   globalAlpha = 1;
 
+  /**
+   * The gradient double. Two deliberate choices keep the guards honest:
+   * `toString()` lists STOPS ONLY — no coordinates — so two flows with the same
+   * treatment but different geometry record the identical fill string and the
+   * one-shared-fill guard keeps meaning "same treatment"; and `colours()` below
+   * explodes the stop list so the saturation and hue bounds see every stop
+   * colour instead of an opaque "[object CanvasGradient]".
+   */
+  createLinearGradient(_x0: number, _y0: number, _x1: number, _y1: number): CanvasGradient {
+    const stops: string[] = [];
+    const gradient = {
+      addColorStop(offset: number, color: string): void {
+        stops.push(`${offset}:${color}`);
+      },
+      toString(): string {
+        return `linear-gradient(${stops.join('|')})`;
+      },
+    };
+    return gradient as unknown as CanvasGradient;
+  }
+
   private record(op: string, ...args: (number | string)[]): void {
     this.calls.push({
       op,
@@ -145,9 +166,17 @@ export class RecordingContext {
   /** Colours actually used. Used to prove no hue reaches the canvas while D15 is open. */
   colours(): Set<string> {
     const set = new Set<string>();
+    const add = (style: string): void => {
+      if (style.startsWith('linear-gradient(')) {
+        // Explode a gradient into its stop colours so per-stop bounds apply.
+        for (const match of style.matchAll(/rgba?\([^)]*\)/g)) set.add(match[0]);
+      } else {
+        set.add(style);
+      }
+    };
     for (const call of this.calls) {
-      set.add(call.fillStyle);
-      set.add(call.strokeStyle);
+      add(call.fillStyle);
+      add(call.strokeStyle);
     }
     return set;
   }

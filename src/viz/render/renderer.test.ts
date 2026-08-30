@@ -74,12 +74,15 @@ describe('Renderer — first render', () => {
     const texts = ctx.texts().join(' ');
     // Rivers, their revenue, their constrictions, the trunk, its residual, the lake.
     expect(texts).toContain('Productivity and Business Processes');
-    expect(texts).toContain('$139,996M');
-    expect(texts).toContain('Cost of revenue');
+    expect(texts).toContain('$139.996B');
+    // The mandatory constriction figure is drawn (0002 C2); the filer's category name for it
+    // is not — that reads on hover now. The trunk's label stays, because 0002 C4 requires it.
+    expect(texts).toContain('$25.017B');
+    expect(texts).not.toContain('Cost of revenue');
     expect(texts).toContain('All segments combined');
     expect(texts).toContain('Taxes and non-operating items');
-    expect(texts).toContain('$21,488M');
-    expect(texts).toContain('$133,749M');
+    expect(texts).toContain('$21.488B');
+    expect(texts).toContain('$133.749B');
     expect(texts).toContain('FY2026');
     renderer.dispose();
   });
@@ -97,9 +100,12 @@ describe('Renderer — first render', () => {
     renderer.start();
     host.pump(1);
     const texts = ctx.texts().join(' ');
+    // 3.3 asks the scale to state itself, and the statement is what does that in the
+    // picture. The px/$ constant behind it is reference material for the analyst and reads
+    // in the margin plate — `canvas-margin.test.tsx` asserts it arrives there.
     expect(texts).toContain('A river this wide carries');
     expect(texts).toContain('of net earnings');
-    expect(texts).toContain('1 px = $1,000,000,000');
+    expect(texts).not.toContain('1 px = $1,000,000,000');
     renderer.dispose();
   });
 });
@@ -169,11 +175,14 @@ describe('Renderer — the ladder in the loop', () => {
   });
 
   it('never presents at a rate that is not 60 or 30', () => {
-    const { renderer, host } = make();
+    const { renderer, host, ctx } = make();
     renderer.start();
     for (let i = 0; i < 400; i += 1) {
       host.costMs = i % 90 < 45 ? 2 : 300;
       host.pump(1);
+      // This test reads metrics, never draw calls; recording 400 frames of the
+      // dressed scene (0038's world plus the glow re-traces) is heap it never uses.
+      ctx.calls.length = 0;
     }
     for (const hz of renderer.metrics().observedLockedRates) expect([60, 30]).toContain(hz);
     expect(renderer.metrics().effectiveHz).toBe(
@@ -193,6 +202,8 @@ describe('Renderer — interaction is not gated on the frame', () => {
     expect(target?.id).toBe(lane?.id);
     expect(overlay.dataset['visible']).toBe('true');
     expect(overlay.textContent).toContain('Productivity and Business Processes');
+    // MILLIONS here, not the scaled form the canvas draws. Both are exact; the hover box
+    // quotes the unit the filing quotes, so an analyst can find this figure on the page.
     expect(overlay.textContent).toContain('$139,996M');
     expect(host).toBeDefined();
     renderer.dispose();
@@ -242,12 +253,13 @@ describe('Renderer — interaction is not gated on the frame', () => {
 
 describe('Renderer — steady state allocates nothing', () => {
   it('holds the frame ring and particle pool at a fixed size over a long run', () => {
-    const { renderer, host } = make({ model: composeOrThrow(referenceLoad(12)) });
+    const { renderer, host, ctx } = make({ model: composeOrThrow(referenceLoad(12)) });
     renderer.start();
     const capacity = renderer.metrics().particleCapacity;
     for (let i = 0; i < 3_000; i += 1) {
       host.costMs = 2;
       host.pump(1);
+      ctx.calls.length = 0; // metrics-only test; see the rate test above
     }
     expect(renderer.metrics().particleCapacity).toBe(capacity);
     // The ring is bounded: 3,000 frames in, it still reports at most its own length.

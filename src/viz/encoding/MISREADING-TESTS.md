@@ -230,3 +230,28 @@ required `annotation` with its dollar value and the width being dimensioned, eve
 carries `disclosure.labelRequired`, and the lake carries a required persistent readout and
 a required period label. A placement solver needs Atelier's type metrics and, for anything
 on the lake side, needs Q1 answered first. Until then no label position exists to collide.
+
+
+## 7. The world dressing cannot be read as data (decision 0038)
+
+The scenery invites four wrong conclusions, each with a mechanical defense:
+
+**"Taller hills mean a better company."** The hills are seeded by the CIK string alone;
+every ridge tile is a pure function of (seed, tile index). `world.test.ts` doubles every
+filed figure and asserts the shared tiles are byte-identical, and a source scan asserts
+`world.ts` names no financial field. Contrast with the lake: the lake IS data, so its
+outline must be inert in shape; the hills are dressing, so their shape must be provably
+disconnected from the filing. Two different obligations, both tested.
+
+**"The terraces are a data series."** There are no terraces — trimmed under Angel's
+governing clause. The anti-bar law binds what remains: bounded slopes, no vertical edges,
+3–5 vertices per 160px tile, so no ridge can drift toward chart-shapes.
+
+**"The mist marks uncertainty."** Mist lives only in the sky band, above the fence no
+label or geometry crosses, in one near-achromatic tone at alpha ≤ 0.2. It touches
+nothing that carries a number.
+
+**"The world bridges the trunk-lake separation."** The terrain runs continuously under
+the gap by Angel's ruling, and the separation rule is drawn ON TOP of the world, with
+the gap constant untouched (`junction.test.ts`). Land under both is what the metaphor
+already claimed; the water still visibly does not connect.

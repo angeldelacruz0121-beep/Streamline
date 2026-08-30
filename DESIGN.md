@@ -78,10 +78,10 @@ forbidden from the canvas, because colour is not yet an encoding channel and mus
    from lukas-petereit-landscape + room-and-wild, held at 8–10% saturation
    with the ground's blue cast. Computed luminance is noted per step.
    This ramp is the beginner's five-second read. Treat it as load-bearing. */
---water-deep:          rgb(28, 29, 31);    /* L≈29  · matches P05 12–31   */
---water-mid:           rgb(64, 66, 71);    /* L≈66  · matches P50 43–89   */
---water-shallow:       rgb(101, 104, 112); /* L≈104                        */
---water-specular:      rgb(196, 201, 212); /* L≈201 · matches P95 172–221 */
+--water-deep:          rgb(16, 30, 44);    /* L≈28  · matches P05 12–31 · 0037 */
+--water-mid:           rgb(38, 68, 90);    /* L≈63  · matches P50 43–89 · 0037 */
+--water-shallow:       rgb(70, 112, 134);  /* L≈105 · 0037                     */
+--water-specular:      rgb(184, 206, 224); /* L≈203 · matches P95 172–221 · 0037 */
 
 /* ─── Accent ───────────────────────────────────────────────────────────────
    UI STATE ONLY. Forbidden on the canvas — see INTENTIONAL CHOICES. */
@@ -256,7 +256,7 @@ third party the visitor list.
 
 | Date | Finding | Reason accepted |
 |---|---|---|
-| — | *(none yet)* | |
+| 2026-08-29 | Water ramp leaves the measured 2–10% saturation envelope: Angel ruled for evocative water (0037, activating 0033's look half). Superseded values: deep rgb(28,29,31) · mid rgb(64,66,71) · shallow rgb(101,104,112) · specular rgb(196,201,212). Luminances kept; chroma added. | Angel |
 
 ## DERIVED VALUES *(appended by `/build`)*
 
