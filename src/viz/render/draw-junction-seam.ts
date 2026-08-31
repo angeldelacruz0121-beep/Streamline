@@ -20,11 +20,25 @@
  * composed against the trunk, no lake mouth set to the trunk width. There is no lake
  * mouth at all.
  */
-import { fillWith, line, strokeWith, text, tracePolygon, type Ctx2D } from './draw-primitives';
-import { css, TONES, TYPE } from './placeholders';
+import {
+  fillWith,
+  line,
+  strokeWith,
+  text,
+  tracePolygon,
+  waterFill,
+  type Ctx2D,
+} from './draw-primitives';
+import { css, TONES, TYPE, WORLD, WORLD_TONES } from './placeholders';
 import type { LakeRegion, Pt, Scene } from './scene';
 
-/** Greedy word wrap. Uses the context's own metrics, so it is font-accurate. */
+/**
+ * Greedy word wrap. Uses the context's own metrics, so it is font-accurate.
+ *
+ * No longer called on the draw path — the one caption that needed wrapping moved to the
+ * DOM, where the browser wraps. Kept because it is the only text measurement this layer
+ * has, it is directly tested, and the vertical re-orientation (0033) will want it back.
+ */
 export function wrapText(ctx: Ctx2D, value: string, maxWidthPx: number): string[] {
   const words = value.split(/\s+/).filter((w) => w.length > 0);
   const lines: string[] = [];
@@ -56,18 +70,12 @@ export function drawSeparation(ctx: Ctx2D, scene: Scene): void {
   const bottom = scene.contentHeightPx - 8;
   line(ctx, { x, y: top }, { x, y: bottom }, TONES.rule, 1);
 
-  const captionX = scene.separation.lakeRegionX;
-  const maxWidth = Math.max(160, scene.lakeRegion.widthPx);
-  ctx.font = TYPE.note;
-  const lines = wrapText(ctx, scene.separation.note, maxWidth);
-  lines.forEach((entry, i) => {
-    text(
-      ctx,
-      entry,
-      { x: captionX, y: 20 + i * 14 },
-      { font: TYPE.note, tone: TONES.textDim, align: 'left', baseline: 'top' },
-    );
-  });
+  // The caption that used to wrap across the top of the lake region now reads in the DOM
+  // margin. What it explains has not changed and neither has the decision: the rule above
+  // IS the statement, and it is the half of it that belongs in the picture. Three lines of
+  // prose printed over the lake region were the half that did not — they landed on the same
+  // pixels as the lake readout at narrow viewports. `scene.separation.note` still carries
+  // the sentences; `CanvasMargin` renders them verbatim.
 }
 
 /** Diagonal hatch inside a clipped region. The dry-floor sign cue for a drained basin. */
@@ -108,8 +116,12 @@ export function drawLake(ctx: Ctx2D, region: LakeRegion): void {
       tracePolygon(ctx, lake.outline);
       strokeWith(ctx, TONES.rule, 4);
     } else {
+      // The lake shares the flows' depth treatment (0037): sheen at the shore,
+      // body tone at the middle, across the region's own vertical extent.
       tracePolygon(ctx, lake.outline);
-      fillWith(ctx, TONES.lakeFill);
+      waterFill(ctx, region.y, region.y + region.heightPx);
+      tracePolygon(ctx, lake.outline);
+      strokeWith(ctx, WORLD_TONES.waterGlowOuter, WORLD.waterGlowWidthPx);
       tracePolygon(ctx, lake.outline);
       strokeWith(ctx, TONES.lakeEdge, 1);
     }
@@ -147,12 +159,9 @@ export function drawLake(ctx: Ctx2D, region: LakeRegion): void {
     for (const end of [lake.depthGauge.from, lake.depthGauge.to] as Pt[]) {
       line(ctx, { x: end.x - 4, y: end.y }, { x: end.x + 4, y: end.y }, TONES.rule, 1);
     }
-    text(
-      ctx,
-      lake.depthGauge.text,
-      { x: lake.depthGauge.to.x + 8, y: (lake.depthGauge.from.y + lake.depthGauge.to.y) / 2 },
-      { font: TYPE.note, tone: TONES.textDim, align: 'left', baseline: 'middle' },
-    );
+    // The gauge itself stays; its caption reads on hover. The mark is the redundant
+    // channel 0006 asks for — the sentence describing the mark is not, and it was the
+    // longest string on the basin side.
   }
 }
 

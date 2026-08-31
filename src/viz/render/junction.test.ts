@@ -179,17 +179,26 @@ describe('the junction — what is actually drawn', () => {
   });
 
   it('says in words that the two scales do not convert', () => {
-    const text = draw().texts().join(' ');
-    expect(text).toContain('stated separately');
-    expect(text).toContain('do not convert');
+    // The words moved to the DOM margin; the sentence did not change and the decision did
+    // not change. The picture keeps the half that belongs in a picture — the vertical rule,
+    // asserted above — and the margin plate carries the prose, where the browser wraps it
+    // and a screen reader can reach it.
+    const note = sceneFor(133_749).separation.note;
+    expect(note).toContain('stated separately');
+    expect(note).toContain('do not convert');
     // And it must not read as unfinished work.
-    expect(text.toLowerCase()).not.toContain('pending');
-    expect(text.toLowerCase()).not.toContain('tbd');
-    expect(text.toLowerCase()).not.toContain('unresolved');
+    expect(note.toLowerCase()).not.toContain('pending');
+    expect(note.toLowerCase()).not.toContain('tbd');
+    expect(note.toLowerCase()).not.toContain('unresolved');
+    // Nothing on the canvas restates it.
+    expect(draw().texts().join(' ')).not.toContain('stated separately');
   });
 
   it('renders the persistent exact net-earnings readout — 0001 C2', () => {
-    expect(draw().texts()).toContain('$133,749M');
+    // Persistent, tabular, and EXACT — `$133.749B` is `$133,749M` written in a unit a
+    // reader takes in at a glance. Nothing is rounded, so C2 stands unamended; the
+    // objection kill-list.md records against `$133,700M` does not reach this.
+    expect(draw().texts()).toContain('$133.749B');
   });
 
   it('renders the fiscal period on the water — 0001 C3', () => {

@@ -26,20 +26,43 @@ describe('drawing a river', () => {
     expect(points.has(`${head?.x.toFixed(6)},${head?.y.toFixed(6)}`)).toBe(true);
   });
 
-  it('writes the segment label, its revenue and its disclosure depth', () => {
+  it('writes the segment label and its revenue, and nothing else', () => {
+    // Two rows at the head. Four was the count that produced the overprinting Angel
+    // reported: the disclosure sentence and the mouth figure are the two that left.
     const texts = drawFirstRiver().texts();
     expect(texts).toContain('Productivity and Business Processes');
-    expect(texts).toContain('$139,996M revenue');
-    expect(texts.some((t) => t.includes('2 expense categories'))).toBe(true);
-    expect(texts).toContain('$83,879M');
+    expect(texts).toContain('$139.996B revenue');
   });
 
-  it('writes the dollar figure and the filer’s own label at every constriction', () => {
+  it('leaves the disclosure sentence and the mouth figure to the margin and to hover', () => {
+    // The triage, asserted from the other side. Neither string is lost — the sentence is on
+    // `RiverLane.disclosureNote` for the margin plate, the figure is on the hover target —
+    // but neither is painted on the picture any more.
     const texts = drawFirstRiver().texts();
-    expect(texts).toContain('$25,017M');
-    expect(texts).toContain('Cost of revenue');
-    expect(texts).toContain('$31,100M');
-    expect(texts).toContain('Operating expenses');
+    expect(texts.some((t) => t.includes('expense categories'))).toBe(false);
+    expect(texts).not.toContain('$83.879B');
+    expect(scene.rivers[0]?.disclosureNote).toContain('2 expense categories');
+    expect(scene.rivers[0]?.mouthText).toBe('$83.879B');
+  });
+
+  it('writes the mandatory dollar figure at every constriction — 0002 C2', () => {
+    const texts = drawFirstRiver().texts();
+    expect(texts).toContain('$25.017B');
+    expect(texts).toContain('$31.1B');
+  });
+
+  it('leaves the filer’s cost-category names to hover, but never the trunk’s — 0002 C4', () => {
+    // C2 mandates the FIGURE at each constriction; it says nothing about the category name.
+    // C4 does mandate the trunk's label, because that constriction must not read as one more
+    // operating cost. The branch keys off `distinctTreatmentRequired`, never off an index.
+    const texts = drawFirstRiver().texts();
+    expect(texts).not.toContain('Cost of revenue');
+    expect(texts).not.toContain('Operating expenses');
+    expect(scene.rivers[0]?.constrictions[0]?.label).toBe('Cost of revenue');
+
+    const trunk = new RecordingContext();
+    drawTrunk(trunk.as(), scene.trunk, quality);
+    expect(trunk.texts()).toContain('Taxes and non-operating items');
   });
 
   it('alternates the annotation side so two figures on one lane cannot collide', () => {
@@ -110,14 +133,14 @@ describe('drawing the trunk', () => {
   it('names itself as the whole company, not as another segment', () => {
     const texts = drawn().texts();
     expect(texts).toContain('All segments combined');
-    expect(texts).toContain('$155,237M segment operating income');
-    expect(texts).toContain('$133,749M');
+    expect(texts).toContain('$155.237B segment operating income');
+    expect(texts).toContain('$133.749B');
   });
 
   it('labels the residual in plain language rather than leaving it to position', () => {
     // MISREADING-TESTS §3: position after the confluence is explicitly not sufficient.
     expect(drawn().texts()).toContain('Taxes and non-operating items');
-    expect(drawn().texts()).toContain('$21,488M');
+    expect(drawn().texts()).toContain('$21.488B');
   });
 
   it('ends the flow with a finished cap, not a torn edge', () => {
@@ -131,11 +154,18 @@ describe('drawing the trunk', () => {
   });
 
   it('says when the residual itemisation was not supplied — 0002 C3', () => {
+    // The fact is still stated; it is stated ONCE. It used to be drawn under the trunk bank
+    // and pushed as scene note `itemization-missing` at the same time — two statements of
+    // one fact, the drawn one landing on top of the constriction annotation. The note is the
+    // survivor and it reads in the margin plate.
     const withoutItems = composeOrThrow({ ...microsoftFy2026(), residualComponents: [] });
     const bare = layoutScene(withoutItems, { widthPx: 1440, heightPx: 900 });
     const ctx = new RecordingContext();
     drawTrunk(ctx.as(), bare.trunk, quality);
-    expect(ctx.texts()).toContain('Residual itemisation not supplied');
-    expect(drawn().texts()).not.toContain('Residual itemisation not supplied');
+    expect(ctx.texts()).not.toContain('Residual itemisation not supplied');
+
+    const note = bare.notes.find((n) => n.code === 'itemization-missing');
+    expect(note?.text).toBe('Trunk residual itemisation not supplied by the data layer.');
+    expect(scene.notes.some((n) => n.code === 'itemization-missing')).toBe(false);
   });
 });

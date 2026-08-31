@@ -10,7 +10,7 @@
  * No allocation in any of these helpers beyond what the context itself does. They are
  * called on every frame.
  */
-import { css, type Tone } from './placeholders';
+import { TONES, css, type Tone } from './placeholders';
 import type { Banks, Pt } from './scene';
 
 export type Ctx2D = Pick<
@@ -32,6 +32,7 @@ export type Ctx2D = Pick<
   | 'clearRect'
   | 'setLineDash'
   | 'clip'
+  | 'createLinearGradient'
   | 'fillStyle'
   | 'strokeStyle'
   | 'lineWidth'
@@ -71,6 +72,35 @@ export function tracePolygon(ctx: Ctx2D, points: readonly Pt[]): void {
     ctx.lineTo(p.x, p.y);
   }
   ctx.closePath();
+}
+
+/**
+ * The water body's shared depth treatment (decision 0037): bank sheen at the edges,
+ * deeper tone in the middle. One gradient SHAPE for every flow — river, trunk and
+ * lake all call this with their own cross-axis extent, and the stop list is a
+ * constant, so no per-segment variation can ride in on it. The luminance range this
+ * spends is the reference library's own prescription for water that reads as water
+ * instead of as a flat shape.
+ */
+const waterGradients = new Map<string, CanvasGradient>();
+
+export function waterFill(ctx: Ctx2D, crossTop: number, crossBottom: number): void {
+  // Memoized per extent: a flow's cross extent changes only on relayout, and the perf
+  // regression gate caught the cost of not caching — ten fresh gradient objects per frame
+  // showed up as allocation churn (a 33ms outlier frame and a heap creep). The map is
+  // tiny (one entry per flow extent) and cleared when a relayout floods it with new keys.
+  const key = `${crossTop}|${crossBottom}`;
+  let gradient = waterGradients.get(key);
+  if (gradient === undefined) {
+    if (waterGradients.size > 64) waterGradients.clear();
+    gradient = ctx.createLinearGradient(0, crossTop, 0, crossBottom);
+    gradient.addColorStop(0, css(TONES.waterEdgeSheen));
+    gradient.addColorStop(0.5, css(TONES.water));
+    gradient.addColorStop(1, css(TONES.waterEdgeSheen));
+    waterGradients.set(key, gradient);
+  }
+  ctx.fillStyle = gradient;
+  ctx.fill();
 }
 
 export function fillWith(ctx: Ctx2D, tone: Tone): void {

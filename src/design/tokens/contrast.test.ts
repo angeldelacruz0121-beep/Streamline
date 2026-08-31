@@ -14,7 +14,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { TONES } from './canvas-tokens';
-import { accent, ink, stateRefused, surface, water } from './tokens';
+import { accent, ink, stateRefused, surface, terrain, water } from './tokens';
 import type { Rgb, Rgba } from './tokens';
 
 function channelLinear(c: number): number {
@@ -160,8 +160,31 @@ describe("textDim's bed-only rule holds at the marked water-body call sites", ()
         at = text.indexOf(MARKER, at + 1);
       }
     }
+    // Was 2. The river's disclosure row was the second marked site; it no longer exists —
+    // that sentence moved to the DOM margin in the text triage, so there is no canvas call
+    // left to mark. The rule is unchanged and the remaining site (the lake period label,
+    // which sits on the water body) is still checked above. Re-audited 2026-08-26.
     expect(markers, 'a water-body marker was deleted — re-audit the rule').toBeGreaterThanOrEqual(
-      2,
+      1,
     );
+  });
+});
+
+describe('every canvas label ink survives the 0038 terrain (the dusk-grade bargain)', () => {
+  // The world ships only because these hold: terrain luminance was capped so the
+  // existing labels keep AA with ZERO new occluders. If a future terrain tweak
+  // breaks one of these, the dressing loses, not the label (Angel's clause).
+  const grounds: readonly Rgb[] = [terrain.base, terrain.shade, terrain.lift];
+
+  it('full text ink clears AA over all terrain tones', () => {
+    for (const ground of grounds) {
+      expect(contrast(TONES.text, ground)).toBeGreaterThanOrEqual(AA_NORMAL);
+    }
+  });
+
+  it('textDim clears AA over all terrain tones (labels sit on terrain, never sky)', () => {
+    for (const ground of grounds) {
+      expect(contrast(TONES.textDim, ground)).toBeGreaterThanOrEqual(AA_NORMAL);
+    }
   });
 });

@@ -21,7 +21,7 @@
  * - Usage note for `textDim`: bed and raised plates only. Over `water` it
  *   composites below AA; figures over water use `text` (contrast.test.ts).
  */
-import { ink, surface, water } from './tokens';
+import { hill, ink, mist, sky, surface, terrain, water } from './tokens';
 import type { Rgb } from './tokens';
 
 /** An sRGB colour with alpha, rendered by `css()`. Replaces `Achromatic`. */
@@ -55,6 +55,12 @@ export const TONES = {
   canvas: tone(surface.sunken, 1),
   /** The single fill shared by every river. Not per-segment, deliberately. */
   water: tone(water.mid, 1),
+  /**
+   * The water gradient's edge stop (0037): bank sheen, opaque so confluence
+   * overlaps cannot double-darken into a false depth channel. Same shared
+   * treatment for every flow; the gradient's stop list is a constant.
+   */
+  waterEdgeSheen: tone(water.shallow, 1),
   waterEdge: tone(water.shallow, 0.9),
   particle: tone(water.specular, 0.55),
   constrictionRim: tone(water.specular, 0.8),
@@ -96,6 +102,12 @@ export const SPACING = {
   marginPx: 40,
   legendHeightPx: 96,
   annotationOffsetPx: 12,
+  /**
+   * The world's sky band above the content top (decision 0038). Scenery only:
+   * the layout offsets all content below it, and the world generator clamps
+   * hills and mist inside it, so no text can ever sit on the sky.
+   */
+  skyBandPx: 96,
 } as const;
 
 /** Same shape as the placeholder `ConstrictionCue`. */
@@ -122,6 +134,51 @@ export const CONSTRICTION_CUES = {
  * (on the 4px grid); the rule's *presence* is Angel's answered Q1 decision.
  */
 export const JUNCTION_SEPARATION_PX = 132;
+
+/**
+ * The world's tones (decision 0038) — scenery, never data. Kept OUT of `TONES`
+ * deliberately: `canvas-tokens.test.ts` polices TONES with the water-only hue
+ * guard, and these carry their own family bounds in the WORLD_TONES describe.
+ * Angel's governing clause binds every value here: if a tone ever fights
+ * legibility or determinism, the dressing loses.
+ */
+export const WORLD_TONES = {
+  skyZenith: tone(sky.zenith, 1),
+  skyMid: tone(sky.mid, 1),
+  skyGlow: tone(sky.glow, 1),
+  terrainBase: tone(terrain.base, 1),
+  terrainShade: tone(terrain.shade, 1),
+  terrainLift: tone(terrain.lift, 1),
+  hillFar: tone(hill.far, 1),
+  hillNear: tone(hill.near, 1),
+  /** Two mist weights; both faint, both sky-band-only. */
+  mistSoft: tone(mist, 0.14),
+  mistDense: tone(mist, 0.2),
+  /** Water rim glow: the specular family at effects quality, stroke only. */
+  waterGlowOuter: tone(water.specular, 0.35),
+} as const satisfies Record<string, Tone>;
+
+/**
+ * World geometry constants (decision 0038). Constants, not encodings: hills
+ * tile at a fixed pitch so only the visible tile count varies with content
+ * width — the same argument `density.ts` makes for particles. The anti-bar
+ * bounds live in `world.ts` and are asserted by `world.test.ts`.
+ */
+export const WORLD = {
+  hillTilePx: 160,
+  hillHeightMinPx: 12,
+  hillHeightMaxPx: 44,
+  /** Hills and mist stay this far above the sky band's floor. */
+  hillClearancePx: 36,
+  waterGlowWidthPx: 3,
+  /**
+   * How far the sky and terrain paint past the content's right edge, so a canvas
+   * wider than the content never shows bare backing store. A constant; the ridge
+   * generator's per-tile purity means the extra tiles are as deterministic as the
+   * visible ones.
+   */
+  overscanPx: 2048,
+} as const;
 
 /**
  * Lake silhouette harmonics. Re-homed from Forge's `silhouette.ts` UNCHANGED

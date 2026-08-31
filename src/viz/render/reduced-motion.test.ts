@@ -18,7 +18,6 @@ function options(overrides: Partial<DrawOptions> = {}): DrawOptions {
     particleY: new Float32Array(0),
     particleCount: 0,
     highlightId: null,
-    noteTextOverride: null,
     ...overrides,
   };
 }
@@ -52,26 +51,36 @@ describe('reduced motion — an equivalent, not a lesser version', () => {
     const moving = new RecordingContext();
     const still = new RecordingContext();
     drawScene(moving.as(), scene, options());
-    drawScene(still.as(), scene, options({ noteTextOverride: REDUCED_MOTION_NOTES }));
+    drawScene(still.as(), scene, options());
     expect([...still.coordinates()].sort()).toEqual([...moving.coordinates()].sort());
   });
 
-  it('writes the identical figures, differing only in the one motion note', () => {
+  it('writes text that is now IDENTICAL between the two paths', () => {
+    // This assertion used to read "differing only in the one motion note", because the note
+    // that must not claim to be flowing was painted on the canvas. It no longer is: the notes
+    // stack reads in the DOM margin, and `CanvasMargin` applies the substitution there.
+    //
+    // That makes Invariant 4.2 STRICTLY stronger, not weaker. The drawn output is now the
+    // same picture byte for byte, and the one sentence that differs lives where a screen
+    // reader can reach it. `canvas-margin.test.tsx` asserts the substitution still happens;
+    // between the two files the "identical information content" claim is still proved end to
+    // end, and neither half can quietly drop it.
     const scene = layoutScene(model, VIEWPORT);
     const moving = new RecordingContext();
     const still = new RecordingContext();
     drawScene(moving.as(), scene, options());
-    drawScene(still.as(), scene, options({ noteTextOverride: REDUCED_MOTION_NOTES }));
+    drawScene(still.as(), scene, options());
 
     const movingTexts = moving.texts();
     const stillTexts = still.texts();
-    expect(stillTexts).toHaveLength(movingTexts.length);
-    const differences = stillTexts.filter((text, i) => text !== movingTexts[i]);
-    expect(differences).toEqual([COPY.reducedMotion]);
+    expect(stillTexts).toEqual(movingTexts);
     // Everything a reader is entitled to — every figure, every label — is still there.
-    expect(stillTexts).toContain('$133,749M');
-    expect(stillTexts).toContain('$21,488M');
+    expect(stillTexts).toContain('$133.749B');
+    expect(stillTexts).toContain('$21.488B');
     expect(stillTexts).toContain('Intelligent Cloud');
+    // And the substituted sentence is not on the canvas by either path.
+    expect(stillTexts).not.toContain(COPY.reducedMotion);
+    expect(stillTexts).not.toContain(COPY.baselineFlow);
   });
 
   it('does not claim to be flowing when nothing is', () => {

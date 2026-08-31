@@ -1,12 +1,19 @@
 /**
  * One frame, in order: ground, water, particles, marks, type.
  *
+ * `Scene.notes` is NOT drawn here. Those sentences read in the DOM margin beside the
+ * canvas, where they are selectable, screen-readable and out of the picture's way. The
+ * scene still carries them — `modelNotes` in `layout.ts` is their source, and
+ * `Scene.notes` is unchanged — so nothing downstream lost access to them.
+ *
  * `drawScene` is a pure function of `(Ctx2D, Scene, DrawOptions)`. It holds no state, so
  * a frame can be reproduced exactly from its inputs — which is what lets the geometry
  * invariance test compare two quality levels by replaying draw calls rather than by
  * comparing pixels.
  */
 import { drawJunctionSeam } from './draw-junction-seam';
+import { drawWorld } from './draw-world';
+import { worldFor } from './world';
 import { fillWith, line, strokeWith, text, tracePolygon, type Ctx2D } from './draw-primitives';
 import { drawRiver, type DrawQuality } from './draw-river';
 import { drawTrunk } from './draw-trunk';
@@ -21,13 +28,12 @@ export interface DrawOptions extends DrawQuality {
   /** Element id under the pointer, or null. Drawn as an outline, never as a hue. */
   readonly highlightId: string | null;
   /**
-   * Draw-time substitution for a scene note's text, keyed by note code. Used only by the
-   * reduced-motion path, which must not say "all rivers are drawn at one baseline flow
-   * speed" when nothing is moving. It is a draw-time override rather than a layout input
-   * so that `Scene` stays identical between the two paths and the geometry-invariance
-   * test can compare them by deep equality.
+   * Seed text for the world's scenery (decision 0038) — the filer's CIK string,
+   * plumbed from the surface. IDENTITY ONLY, never a financial value; the same
+   * company gets the same hills forever. Absent (tests, harness) the world still
+   * draws, deterministically, under the default seed.
    */
-  readonly noteTextOverride: Readonly<Record<string, string>> | null;
+  readonly worldSeed?: string;
 }
 
 export const NO_PARTICLES: Pick<DrawOptions, 'particleX' | 'particleY' | 'particleCount'> = {
@@ -76,34 +82,16 @@ function drawLegendItem(ctx: Ctx2D, item: LegendItem): void {
     strokeWith(ctx, TONES.lakeEdge, 1);
   }
   const half = item.kind === 'reference-bar' ? item.lengthPx / 2 : item.radiusPx;
+  // Invariant 3.3 requires the scale to state itself, and the statement is what does that:
+  // "a river this wide carries $X a year" is readable by someone who has never seen a
+  // px/$ constant. The constant itself is reference material for the analyst and reads in
+  // the margin, where it does not sit under the legend competing with the notes stack.
   text(
     ctx,
     item.statement,
     { x: item.centre.x - half, y: item.centre.y + half + 12 },
     { font: TYPE.note, tone: TONES.text, align: 'left', baseline: 'top' },
   );
-  text(
-    ctx,
-    item.constant,
-    { x: item.centre.x - half, y: item.centre.y + half + 26 },
-    { font: TYPE.note, tone: TONES.textDim, align: 'left', baseline: 'top' },
-  );
-}
-
-export function drawNotes(
-  ctx: Ctx2D,
-  scene: Scene,
-  override: Readonly<Record<string, string>> | null = null,
-): void {
-  for (const note of scene.notes) {
-    const value = override === null ? note.text : (override[note.code] ?? note.text);
-    text(ctx, value, note.anchor, {
-      font: TYPE.note,
-      tone: note.code === 'period' ? TONES.text : TONES.textDim,
-      align: 'left',
-      baseline: 'top',
-    });
-  }
 }
 
 /**
@@ -151,12 +139,14 @@ export function drawHighlight(ctx: Ctx2D, scene: Scene, id: string | null): void
 }
 
 export function drawScene(ctx: Ctx2D, scene: Scene, options: DrawOptions): void {
-  drawBackground(ctx, scene);
+  // The world underlies everything data-bearing (0038). `drawBackground` survives as
+  // the world-free ground for surfaces that must render with NO world painted — the
+  // refusal arms compose no Scene, so they never reach here at all.
+  drawWorld(ctx, worldFor(scene, options.worldSeed ?? 'no-company'), options);
   for (const lane of scene.rivers) drawRiver(ctx, lane, options);
   drawTrunk(ctx, scene.trunk, options);
   drawParticles(ctx, options);
   drawJunctionSeam(ctx, scene);
   drawLegend(ctx, scene);
-  drawNotes(ctx, scene, options.noteTextOverride);
   drawHighlight(ctx, scene, options.highlightId);
 }

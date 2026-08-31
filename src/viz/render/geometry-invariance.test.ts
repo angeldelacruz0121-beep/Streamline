@@ -26,7 +26,6 @@ function optionsAt(level: (typeof QUALITY_LADDER)[number]): DrawOptions {
     particleY: new Float32Array(0),
     particleCount: 0,
     highlightId: null,
-    noteTextOverride: null,
   };
 }
 
@@ -63,8 +62,8 @@ describe('geometry invariance across the degradation ladder', () => {
     });
     const first = texts[0];
     for (const set of texts) expect(set).toEqual(first);
-    expect(first?.join(' ')).toContain('$133,749M');
-    expect(first?.join(' ')).toContain('$21,488M');
+    expect(first?.join(' ')).toContain('$133.749B');
+    expect(first?.join(' ')).toContain('$21.488B');
   });
 
   it('produces a byte-identical Scene at every pinned rung, through the renderer', () => {

@@ -25,11 +25,29 @@
   --ink-tertiary: rgba(255, 255, 255, 0.5);
   --ink-faint: rgba(255, 255, 255, 0.2); /* hairlines and disabled only — never text (fails AA) */
 
-  /* ── Water — measured ramp, load-bearing; see file header ─────────────── */
-  --water-deep: rgb(28, 29, 31); /* L≈29  · matches P05 12-31   */
-  --water-mid: rgb(64, 66, 71); /* L≈66  · matches P50 43-89   */
-  --water-shallow: rgb(101, 104, 112); /* L≈104 */
-  --water-specular: rgb(196, 201, 212); /* L≈201 · matches P95 172-221 */
+  /* ── Water — luminance ramp held, chroma added (0037, 2026-08-29) ──────
+     Angel ruled for evocative water: genuinely blue, one shared hue for every
+     flow, D15 still open. The measured LUMINANCE percentiles still govern —
+     dark body, near-white specular minority — and the 2-10% saturation
+     envelope is overridden with the supersession recorded in DESIGN.md. */
+  --water-deep: rgb(16, 30, 44); /* L≈28  · matches P05 12-31   */
+  --water-mid: rgb(38, 68, 90); /* L≈63  · matches P50 43-89   */
+  --water-shallow: rgb(70, 112, 134); /* L≈105 */
+  --water-specular: rgb(184, 206, 224); /* L≈203 · matches P95 172-221 */
+
+  /* The world families (decision 0038, 2026-08-30). Scenery only — sky in its
+     fenced band, terrain under everything, hills on the horizon, mist above it.
+     Angel's governing clause: if any of these ever fight legibility or
+     determinism, the dressing loses. Bounds enforced in canvas-tokens.test.ts. */
+  --sky-zenith: rgb(224, 178, 186); /* wrapped hue ≈350° */
+  --sky-mid: rgb(238, 190, 168); /* hue ≈19° */
+  --sky-glow: rgb(248, 214, 170); /* hue ≈34°, horizon */
+  --terrain-base: rgb(30, 42, 32); /* dusk sage · white ink ≈11.9:1 */
+  --terrain-shade: rgb(24, 33, 26); /* extrusion shade pair, dark side */
+  --terrain-lift: rgb(34, 46, 36); /* extrusion shade pair, lit side */
+  --hill-far: rgb(122, 104, 96); /* horizon silhouettes only */
+  --hill-near: rgb(64, 74, 52);
+  --mist: rgb(214, 220, 224); /* alpha ≤ 0.2, sky band only */
 
   /* ── Accent — UI STATE ONLY. Forbidden on the canvas. ─────────────────── */
   --accent: rgb(46, 167, 255);
@@ -101,8 +119,15 @@
  *   --measure-plate: 45 × --text-body. The readable measure for a state plate.
  *   --canvas-min:    120 × the 4px base. Floor for the canvas region so the
  *                    legend band (96px) never crowds the picture.
+ *   --measure-tip:   24 × --text-body. Narrow on purpose: the hover box holds a
+ *                    name, a figure and at most two supporting lines, and a wider
+ *                    box would sit over more of the picture it is describing.
+ *   --measure-margin: the canvas margin plate. Wide enough for the legibility
+ *                    findings, which are the longest sentences in the product.
  */
 :root {
   --measure-plate: 720px;
   --canvas-min: 480px;
+  --measure-tip: 384px;
+  --measure-margin: 320px;
 }

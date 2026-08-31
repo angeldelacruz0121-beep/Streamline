@@ -24,7 +24,7 @@
  * trunk's — is honoured by copying `spanPx` through rather than computing one.
  */
 import type { CanvasModel, ConstrictionGeometry, RiverGeometry, WidthStation } from '../encoding';
-import { formatUsdExact, formatUsdMillions } from './format';
+import { formatUsdScaled } from './format';
 import { COPY, JUNCTION_SEPARATION_PX, SPACING } from './placeholders';
 import { lakeOutline, outlineBounds } from './silhouette';
 import type {
@@ -106,7 +106,7 @@ function annotate(
   const anchorY = edgeY + (above ? -1 : 1) * SPACING.annotationOffsetPx;
   return {
     valueUsd: constriction.annotation.valueUsd,
-    text: formatUsdMillions(constriction.annotation.valueUsd),
+    text: formatUsdScaled(constriction.annotation.valueUsd),
     anchor: { x: throatX, y: anchorY },
     leaderFrom: { x: throatX, y: anchorY + (above ? 3 : -3) },
     leaderTo: { x: throatX, y: edgeY },
@@ -228,14 +228,12 @@ function layoutRiver(
     mouthWidthPx: river.mouthWidthPx,
     revenueUsd: river.revenueUsd,
     operatingIncomeUsd: river.operatingIncomeUsd,
-    headText: formatUsdMillions(river.revenueUsd),
-    mouthText: formatUsdMillions(river.operatingIncomeUsd),
+    headText: formatUsdScaled(river.revenueUsd),
+    mouthText: formatUsdScaled(river.operatingIncomeUsd),
     stations,
     banks: buildBanks(runs, centreYAt),
     constrictions: placed,
-    disclosureNote: river.aggregated
-      ? `${river.label}. Combined across segments, not filer-shaped.`
-      : COPY.disclosure(river.disclosure.costCategoriesDisclosed),
+    disclosureNote: disclosureNoteFor(river),
     surfacePx2: runsArea(runs),
   };
 }
@@ -304,8 +302,8 @@ function layoutTrunk(model: CanvasModel, startX: number, centreY: number): Trunk
     departingWidthPx: model.trunk.departingWidthPx,
     arrivingUsd: model.trunk.arrivingUsd,
     departingUsd: model.trunk.departingUsd,
-    arrivingText: formatUsdMillions(model.trunk.arrivingUsd),
-    departingText: formatUsdMillions(model.trunk.departingUsd),
+    arrivingText: formatUsdScaled(model.trunk.arrivingUsd),
+    departingText: formatUsdScaled(model.trunk.departingUsd),
     stations,
     banks: buildBanks(runs, () => centreY),
     constriction: {
@@ -319,7 +317,13 @@ function layoutTrunk(model: CanvasModel, startX: number, centreY: number): Trunk
       widthAfterPx: c.widthAfterPx,
       removedWidthPx: c.removedWidthPx,
       spanPx: c.spanPx,
-      annotation: annotate(c, (enterX + exitX) / 2, centreY, c.widthBeforePx, true),
+      // BELOW the trunk, and that is structural rather than aesthetic. The trunk states its
+      // own name and arriving figure above its top bank (`drawTrunkLabels`), so an annotation
+      // placed above lands in an occupied band every time — the figure at `topAt - 12` and
+      // its label at `topAt - 25`, interleaved with captions at `topAt - 20` and `topAt - 7`.
+      // Nothing below the trunk competes. Same reasoning as the `index % 2` alternation on a
+      // river: a fixed structural choice, decided once, not a measured one.
+      annotation: annotate(c, (enterX + exitX) / 2, centreY, c.widthBeforePx, false),
       overdraw: c.overdraw,
       distinctTreatmentRequired: c.distinctTreatmentRequired,
     },
@@ -349,7 +353,11 @@ function layoutLake(model: CanvasModel, regionX: number, shorelineY: number): La
     depthBelowShorelinePx: lake.depthBelowShorelinePx,
     signCues: lake.signCues,
     netEarningsUsd: lake.netEarningsUsd,
-    readoutText: formatUsdExact(lake.netEarningsReadout.usd),
+    // 0001 C2 holds unchanged. The figure is still persistent text in tabular numerals and
+    // it is still EXACT — `$133,749M` and `$133.749B` are the same number, and the scaled
+    // form is the one a reader can take in without arithmetic. Nothing here is rounded, so
+    // the objection `kill-list.md` records against `$133,700M` does not apply.
+    readoutText: formatUsdScaled(lake.netEarningsReadout.usd),
     readoutAnchor: { x: centre.x, y: centre.y - halfH - 30 },
     periodLabel: lake.fiscalPeriodLabel,
     periodAnchor: { x: centre.x, y: centre.y - halfH - 13 },
@@ -364,6 +372,102 @@ function layoutLake(model: CanvasModel, regionX: number, shorelineY: number): La
   };
 
   return { x: regionX, y: shorelineY - halfH, widthPx: halfW * 2, heightPx: halfH * 2, lake: body };
+}
+
+/**
+ * Invariant 3.2 / 3.8's labelling duty, as one sentence per river.
+ *
+ * Still carried on `RiverLane.disclosureNote` so nothing downstream lost it, and now also
+ * read out by `marginContent` for the DOM plate that renders it. One function so the two
+ * cannot drift apart.
+ */
+function disclosureNoteFor(river: RiverGeometry): string {
+  return river.aggregated
+    ? `${river.label}. Combined across segments, not filer-shaped.`
+    : COPY.disclosure(river.disclosure.costCategoriesDisclosed);
+}
+
+/** Everything the DOM margin renders. Strings only, and every one of them already existed. */
+export interface MarginContent {
+  readonly scales: readonly { readonly id: string; readonly constant: string }[];
+  readonly disclosures: readonly {
+    readonly id: string;
+    readonly label: string;
+    readonly note: string;
+  }[];
+  readonly separation: string;
+  readonly notes: readonly ModelNote[];
+}
+
+/**
+ * The prose that used to be painted on the canvas, gathered for the margin plate.
+ *
+ * Viewport-free and pure, so it is safe to call from React on every render, and it carries
+ * no financial object — `canvas-adapter.ts` stripped provenance long before `CanvasModel`
+ * reached here, which is Invariant 4.3 holding by construction rather than by promise.
+ *
+ * The `overflow` note is deliberately absent: it is the one note that depends on the
+ * viewport, it lives on `Scene`, and the scroll bar already says the same thing.
+ */
+export function marginContent(model: CanvasModel): MarginContent {
+  return {
+    scales: model.scales.map((scale) => ({ id: scale.id, constant: scale.constant })),
+    disclosures: model.rivers.map((river) => ({
+      id: river.id,
+      label: river.label,
+      note: disclosureNoteFor(river),
+    })),
+    separation: COPY.separationRule,
+    notes: modelNotes(model),
+  };
+}
+
+/** A note before it has a position. The text is the model's; the anchor is the scene's. */
+export interface ModelNote {
+  readonly code: string;
+  readonly text: string;
+}
+
+/**
+ * Every note the model itself justifies, in order, with no viewport in the argument list.
+ *
+ * Split out of `layoutScene` because these sentences are no longer painted on the canvas —
+ * they read in the DOM margin beside it, where they are selectable and screen-readable. The
+ * canvas keeps the figures; the prose keeps the reader. `layoutScene` still anchors exactly
+ * this list and still appends the one viewport-dependent note (`overflow`), so `Scene.notes`
+ * is unchanged and `layout.test.ts` holds as written.
+ *
+ * Pure, and deliberately so: `CanvasModel` has already had provenance stripped by
+ * `canvas-adapter.ts`, so handing this result to React carries no financial object across
+ * the boundary Invariant 4.3 draws.
+ */
+export function modelNotes(model: CanvasModel): readonly ModelNote[] {
+  const notes: ModelNote[] = [];
+  const push = (code: string, text: string): void => {
+    notes.push({ code, text });
+  };
+
+  push('period', model.fiscalPeriodLabel);
+  // Invariant 3.5: a flow with no prior-period comparison renders at baseline speed and
+  // is labelled as such. Nothing here varies with growth; D9 is open and excluded.
+  push('baseline-flow', COPY.baselineFlow);
+  if (model.rivers.filter((r) => !r.aggregated).length === 1) {
+    push('single-segment', 'This filer reports a single revenue segment. Invariant 3.8.');
+  }
+  if (model.collapsed !== null) {
+    push(
+      'collapsed',
+      `${COPY.moreControl(model.collapsed.count)}. Hidden segments still flow into the lake.`,
+    );
+  }
+  if (!model.trunk.itemization.provided) {
+    push('itemization-missing', 'Trunk residual itemisation not supplied by the data layer.');
+  }
+  for (const finding of model.legibility.findings) {
+    push(`legibility/${finding.code}`, finding.message);
+  }
+
+  return notes;
 }
 
 export function layoutScene(model: CanvasModel, viewport: Viewport): Scene {
@@ -389,7 +493,9 @@ export function layoutScene(model: CanvasModel, viewport: Viewport): Scene {
     probeLake.heightPx + 64,
     120,
   );
-  const shorelineY = SPACING.marginPx + bandHeight / 2;
+  // Decision 0038: the world's sky band sits above the content; all content shifts
+  // down by exactly skyBandPx. Widths and the flow axis are untouched.
+  const shorelineY = SPACING.marginPx + SPACING.skyBandPx + bandHeight / 2;
 
   let headCursor = shorelineY - headExtent / 2;
   let packCursor = shorelineY - model.trunk.arrivingWidthPx / 2;
@@ -416,9 +522,10 @@ export function layoutScene(model: CanvasModel, viewport: Viewport): Scene {
   };
 
   const contentWidthPx = lakeRegion.x + lakeRegion.widthPx + SPACING.marginPx + 96;
-  const contentHeightPx = SPACING.marginPx * 2 + bandHeight + SPACING.legendHeightPx;
+  const contentHeightPx =
+    SPACING.marginPx * 2 + SPACING.skyBandPx + bandHeight + SPACING.legendHeightPx;
 
-  const legendY = SPACING.marginPx + bandHeight + SPACING.legendHeightPx / 2;
+  const legendY = SPACING.marginPx + SPACING.skyBandPx + bandHeight + SPACING.legendHeightPx / 2;
   const widthScale = model.scales.find((s) => s.id === 'width');
   const areaScale = model.scales.find((s) => s.id === 'area');
   const legend: LegendItem[] = [
@@ -449,25 +556,7 @@ export function layoutScene(model: CanvasModel, viewport: Viewport): Scene {
     notes.push({ code, text, anchor: { x: SPACING.marginPx, y: 18 + notes.length * 15 } });
   };
 
-  push('period', model.fiscalPeriodLabel);
-  // Invariant 3.5: a flow with no prior-period comparison renders at baseline speed and
-  // is labelled as such. Nothing here varies with growth; D9 is open and excluded.
-  push('baseline-flow', COPY.baselineFlow);
-  if (model.rivers.filter((r) => !r.aggregated).length === 1) {
-    push('single-segment', 'This filer reports a single revenue segment. Invariant 3.8.');
-  }
-  if (model.collapsed !== null) {
-    push(
-      'collapsed',
-      `${COPY.moreControl(model.collapsed.count)}. Hidden segments still flow into the lake.`,
-    );
-  }
-  if (!model.trunk.itemization.provided) {
-    push('itemization-missing', 'Trunk residual itemisation not supplied by the data layer.');
-  }
-  for (const finding of model.legibility.findings) {
-    push(`legibility/${finding.code}`, finding.message);
-  }
+  for (const note of modelNotes(model)) push(note.code, note.text);
 
   const crossOverflow = Math.max(0, contentHeightPx - viewport.heightPx);
   const flowOverflow = Math.max(0, contentWidthPx - viewport.widthPx);

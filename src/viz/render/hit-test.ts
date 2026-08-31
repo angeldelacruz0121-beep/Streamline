@@ -13,8 +13,9 @@
  * floating-point comparisons. The measured cost is in the harness; the design point is
  * that it does not depend on what the renderer is doing.
  */
+import { formatUsdMillions } from './format';
 import { pointInPolygon } from './silhouette';
-import type { Pt, Scene } from './scene';
+import type { PlacedConstriction, Pt, Scene } from './scene';
 import type { Usd } from '../scales';
 
 export type HitKind = 'river' | 'constriction' | 'trunk-constriction' | 'lake';
@@ -26,6 +27,19 @@ export interface HitTarget {
   /** The reported figure this element states, for the tooltip. Never a derived one. */
   readonly valueUsd: Usd;
   readonly valueText: string;
+  /**
+   * Supporting rows for the hover box, in reading order.
+   *
+   * Every entry is a string already present on the `Scene` — a figure `layout.ts` formatted,
+   * a sentence the model carried, or one of the two label templates this canvas has always
+   * printed. Nothing here is composed for the tooltip and nothing is authored: copy is
+   * Angel's and `voice.md` is unseeded, so this reveals what the picture already said rather
+   * than saying anything new.
+   *
+   * NOT the D17 analyst panel. No accession, form, XBRL tag or provenance reaches this —
+   * `canvas-adapter.ts` stripped all of it before the model ever got here, and D17 is open.
+   */
+  readonly detail: readonly string[];
 }
 
 interface IndexedRect {
@@ -89,15 +103,22 @@ export function buildHitIndex(scene: Scene): HitIndex {
     widthBeforePx: number,
     valueUsd: Usd,
     valueText: string,
+    detail: readonly string[],
   ): void => {
     rects.push({
-      target: { id, kind, label, valueUsd, valueText },
+      target: { id, kind, label, valueUsd, valueText, detail },
       minX: enterX - GRAB_PAD_PX,
       maxX: exitX + GRAB_PAD_PX,
       minY: centreY - widthBeforePx / 2 - GRAB_PAD_PX,
       maxY: centreY + widthBeforePx / 2 + GRAB_PAD_PX,
     });
   };
+
+  // `overdraw.note` states a shortfall the width channel could not carry. `annotationRequired`
+  // has always demanded it be stated and nothing has ever drawn it (STATUS.md, open item), so
+  // surfacing it here adds information rather than relocating it.
+  const overdrawDetail = (c: PlacedConstriction): readonly string[] =>
+    c.overdraw === null ? [] : [c.overdraw.note];
 
   for (const lane of scene.rivers) {
     for (const c of lane.constrictions) {
@@ -110,7 +131,8 @@ export function buildHitIndex(scene: Scene): HitIndex {
         c.centreY,
         c.widthBeforePx,
         c.annotation.valueUsd,
-        c.annotation.text,
+        formatUsdMillions(c.annotation.valueUsd),
+        overdrawDetail(c),
       );
     }
   }
@@ -124,7 +146,8 @@ export function buildHitIndex(scene: Scene): HitIndex {
     tc.centreY,
     tc.widthBeforePx,
     tc.annotation.valueUsd,
-    tc.annotation.text,
+    formatUsdMillions(tc.annotation.valueUsd),
+    overdrawDetail(tc),
   );
 
   for (const lane of scene.rivers) {
@@ -135,7 +158,17 @@ export function buildHitIndex(scene: Scene): HitIndex {
         kind: 'river',
         label: lane.label,
         valueUsd: lane.revenueUsd,
-        valueText: lane.headText,
+        // Both templates below are the ones this canvas already printed: `${headText}
+        // revenue` came off the river head, `${mouthText} segment operating income` off the
+        // trunk. Reused unchanged so the hover box introduces no wording of its own.
+        // Millions, because filings quote in millions: an analyst checking the picture
+        // against the 10-K reads `$139,996M` off the page without converting anything. The
+        // canvas states the same number scaled — both are exact, neither is rounded.
+        valueText: `${formatUsdMillions(lane.revenueUsd)} revenue`,
+        detail: [
+          `${formatUsdMillions(lane.operatingIncomeUsd)} segment operating income`,
+          lane.disclosureNote,
+        ],
       },
       points,
       ...bounds(points),
@@ -150,7 +183,8 @@ export function buildHitIndex(scene: Scene): HitIndex {
         kind: 'lake',
         label: `${lake.periodLabel} net earnings`,
         valueUsd: lake.netEarningsUsd,
-        valueText: lake.readoutText,
+        valueText: formatUsdMillions(lake.netEarningsUsd),
+        detail: lake.depthGauge === null ? [] : [lake.depthGauge.text],
       },
       points: lake.outline,
       ...bounds(lake.outline),
