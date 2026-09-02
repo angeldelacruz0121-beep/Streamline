@@ -171,11 +171,11 @@ machine noise — the no-world control failed pacing worse than the world build)
 **Current renderable state:** Six filers return renderable DATA from EDGAR pipeline (Microsoft, Apple, NVIDIA, HP, Autodesk, Meta). Meta's data layer is correct; drawing layer refuses to render pending 0032 decision.
 
 **Open hand-offs (four):**
-0. **Performance Engineer:** re-record `perf/baseline.json` on an idle machine. The regression
-   gate now fails against the 2026-08-21 baseline (interaction p95 ~13.5ms vs 8.5×1.25 allowed)
-   because two approved features legitimately changed the profile — the hover-box rows
-   (2026-08-26) and the 0037 water gradient (2026-08-29, memoized). Every ABSOLUTE 4.1 gate
-   passes with wide margin; only the stale-baseline comparison trips.
+0. **CLOSED 2026-09-01 (decision 0039):** the perf gate passes 9/9 on an idle machine against a
+   fresh baseline verified by a second clean run. The two open failures were not noise: the
+   33ms frame was the test driver's input queue (the app's hover response is 0.1ms), the 25.1ms
+   was a half-tick boundary reading. Angel ruled the strict pair onto the cluster rule and the
+   regression burst in-page; heap growth closed, 3/3 soaks pass.
 1. **QA Engineer:** fixtures/README.md wrongly assigns amendment case to Super Micro (no 10-K/A); HP has three real amendments of three different shapes. 15 of 19 captured envelopes no longer match current pipeline output because of other agents' fixes.
 2. **Software Architect and Art Director:** the new `filing` block (0028's metadata) is available and unrendered.
 3. **Financial Data Analyst:** the accession handed to ingestAnnualSegments can now be a 10-K/A (0028 implementation complete).
