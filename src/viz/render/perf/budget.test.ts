@@ -294,6 +294,30 @@ describe('regression gate', () => {
     expect(result.details.find((c) => c.id === 'regression/worst')?.pass).toBe(false);
   });
 
+  it('does not call an on-time p99 a regression, even against a faster baseline (2026-09-01)', () => {
+    // 1.2% of frames stamped at a half-tick: p99 lands at 24.9ms, past 16.9 x 1.25 = 21.1,
+    // but inside the invariant's own on-time line (locked interval + half a display tick).
+    const report = evaluate(
+      render({ frameIntervalsMs: [...frames(593, 16.67), ...frames(7, 24.9)] }),
+      cleanInteraction,
+      cleanResources,
+    );
+    const result = checkRegression(report, baseline);
+    expect(result.details.find((c) => c.id === 'regression/p99')?.pass).toBe(true);
+    expect(result.regressed).toBe(false);
+  });
+
+  it('still calls a p99 past the on-time line a regression', () => {
+    const report = evaluate(
+      render({ frameIntervalsMs: [...frames(593, 16.67), ...frames(7, 33.3)] }),
+      cleanInteraction,
+      cleanResources,
+    );
+    expect(
+      checkRegression(report, baseline).details.find((c) => c.id === 'regression/p99')?.pass,
+    ).toBe(false);
+  });
+
   it('does not call sub-millisecond input noise a regression', () => {
     const report = evaluate(
       render(),
